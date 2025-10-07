@@ -28,6 +28,11 @@ const SavingsAccountForm = () => {
     paymentProofFile: null,
   });
 
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [alertMessage, setAlertMessage] = useState({ type: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -40,8 +45,69 @@ const SavingsAccountForm = () => {
     }
   };
 
+  const generateUPIQRCode = () => {
+    // UPI Payment Details
+    const upiId = "9743474558@yescred"; // Your PhonePe UPI ID
+    const payeeName = "Finance"; // Your business name
+    const amount = "1";
+    const transactionNote = "Savings Account Registration Fee";
+
+    // Generate UPI URL
+    const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(
+      payeeName
+    )}&am=${amount}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+
+    // Generate QR Code using API.QRServer (more reliable)
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+      upiUrl
+    )}`;
+
+    setQrCodeUrl(qrUrl);
+    setShowPaymentModal(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setAlertMessage({ type: "", message: "" });
+
+    // Validate all required fields
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "aadharNumber",
+      "contactNumber",
+      "email",
+      "idProofType",
+      "idProofNumber",
+      "idProofFile",
+      "addressLine",
+      "area",
+      "city",
+      "state",
+      "pincode",
+      "addressProofType",
+      "addressProofNumber",
+      "addressProofFile",
+      "photoFile",
+      "occupationType",
+      "nomineeName",
+      "nomineeContact",
+      "nomineeRelation",
+      "paymentProofFile",
+    ];
+
+    const missingFields = requiredFields.filter((field) => !formData[field]);
+
+    if (missingFields.length > 0) {
+      setAlertMessage({
+        type: "error",
+        message: "Please fill all required fields before submitting.",
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    setIsSubmitting(true);
 
     // Create FormData object
     const formDataToSend = new FormData();
@@ -54,7 +120,6 @@ const SavingsAccountForm = () => {
     });
 
     console.log("Form submitted - FormData entries:");
-    // Log FormData contents for debugging
     for (let pair of formDataToSend.entries()) {
       console.log(pair[0] + ": " + pair[1]);
     }
@@ -62,10 +127,59 @@ const SavingsAccountForm = () => {
     try {
       const response = await sendFormData(formDataToSend);
       console.log("Response:", response);
-      // Handle success (show message, reset form, etc.)
+
+      setAlertMessage({
+        type: "success",
+        message:
+          "Your savings account registration has been submitted successfully! Our team will contact you shortly.",
+      });
+
+      // Reset form after successful submission
+      setFormData({
+        firstName: "",
+        lastName: "",
+        aadharNumber: "",
+        contactNumber: "",
+        email: "",
+        idProofType: "",
+        idProofNumber: "",
+        idProofFile: null,
+        addressLine: "",
+        area: "",
+        city: "",
+        state: "",
+        pincode: "",
+        landmark: "",
+        addressProofType: "",
+        addressProofNumber: "",
+        addressProofFile: null,
+        photoFile: null,
+        occupationType: "",
+        nomineeName: "",
+        nomineeContact: "",
+        nomineeRelation: "",
+        paymentProofFile: null,
+      });
+
+      // Clear file inputs
+      document.querySelectorAll('input[type="file"]').forEach((input) => {
+        input.value = "";
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       console.error("Error submitting form:", error);
-      // Handle error
+
+      setAlertMessage({
+        type: "error",
+        message:
+          error.response?.data?.message ||
+          "Failed to submit the form. Please try again or contact support.",
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -165,6 +279,57 @@ const SavingsAccountForm = () => {
         <div className="container">
           <div className="row">
             <div className="col-xl-12">
+              {/* Alert Messages */}
+              {alertMessage.message && (
+                <div
+                  style={{
+                    padding: "15px 20px",
+                    marginBottom: "20px",
+                    borderRadius: "5px",
+                    backgroundColor:
+                      alertMessage.type === "success" ? "#d4edda" : "#f8d7da",
+                    border: `1px solid ${
+                      alertMessage.type === "success" ? "#c3e6cb" : "#f5c6cb"
+                    }`,
+                    color:
+                      alertMessage.type === "success" ? "#155724" : "#721c24",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <i
+                      className={`fas ${
+                        alertMessage.type === "success"
+                          ? "fa-check-circle"
+                          : "fa-exclamation-circle"
+                      }`}
+                      style={{ fontSize: "20px" }}
+                    ></i>
+                    <span>{alertMessage.message}</span>
+                  </div>
+                  <button
+                    onClick={() => setAlertMessage({ type: "", message: "" })}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      fontSize: "20px",
+                      cursor: "pointer",
+                      color: "inherit",
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
               <div
                 className="apply-form-box clearfix"
                 style={{
@@ -679,6 +844,28 @@ const SavingsAccountForm = () => {
                           >
                             Notice: Registration FEE: Rs.1000
                           </strong>
+                          <div style={{ marginTop: "10px" }}>
+                            <button
+                              type="button"
+                              onClick={generateUPIQRCode}
+                              style={{
+                                padding: "10px 30px",
+                                backgroundColor: "#28a745",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "5px",
+                                fontSize: "14px",
+                                fontWeight: "bold",
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "8px",
+                              }}
+                            >
+                              <i className="fas fa-qrcode"></i>
+                              Generate UPI QR Code
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -696,7 +883,7 @@ const SavingsAccountForm = () => {
                               fontWeight: "bold",
                             }}
                           >
-                            Payment Proof Upload
+                            Payment Proof Upload (Screenshot after payment)
                           </label>
                           <input
                             type="file"
@@ -717,20 +904,27 @@ const SavingsAccountForm = () => {
                         <div className="button-box">
                           <button
                             onClick={handleSubmit}
+                            type="submit"
+                            disabled={isSubmitting}
                             className="btn-one"
                             style={{
                               padding: "15px 40px",
-                              backgroundColor: "#007bff",
+                              backgroundColor: isSubmitting
+                                ? "#6c757d"
+                                : "#007bff",
                               color: "#fff",
                               border: "none",
                               borderRadius: "5px",
                               fontSize: "16px",
                               fontWeight: "bold",
-                              cursor: "pointer",
+                              cursor: isSubmitting ? "not-allowed" : "pointer",
                               width: "100%",
+                              opacity: isSubmitting ? 0.7 : 1,
                             }}
                           >
-                            <span className="txt">Send Request</span>
+                            <span className="txt">
+                              {isSubmitting ? "Submitting..." : "Send Request"}
+                            </span>
                           </button>
                         </div>
                       </div>
@@ -742,6 +936,121 @@ const SavingsAccountForm = () => {
           </div>
         </div>
       </section>
+
+      {/* UPI Payment Modal */}
+      {showPaymentModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.7)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+          onClick={() => setShowPaymentModal(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "10px",
+              padding: "30px",
+              maxWidth: "500px",
+              width: "90%",
+              textAlign: "center",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowPaymentModal(false)}
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                background: "none",
+                border: "none",
+                fontSize: "24px",
+                cursor: "pointer",
+                color: "#666",
+              }}
+            >
+              ×
+            </button>
+
+            <h3 style={{ marginBottom: "20px", color: "#333" }}>
+              Pay Registration Fee - ₹1000
+            </h3>
+
+            <div style={{ marginBottom: "20px" }}>
+              <img
+                src={qrCodeUrl}
+                alt="UPI QR Code"
+                style={{
+                  maxWidth: "300px",
+                  width: "100%",
+                  height: "auto",
+                  border: "2px solid #ddd",
+                  borderRadius: "10px",
+                  padding: "10px",
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "20px", color: "#666" }}>
+              <p style={{ marginBottom: "10px" }}>
+                <strong>Scan QR code with any UPI app</strong>
+              </p>
+              <p style={{ fontSize: "14px" }}>
+                (Google Pay, PhonePe, Paytm, BHIM, etc.)
+              </p>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "#f8f9fa",
+                padding: "15px",
+                borderRadius: "5px",
+                marginBottom: "20px",
+                fontSize: "14px",
+                textAlign: "left",
+              }}
+            >
+              <p style={{ marginBottom: "8px" }}>
+                <strong>Instructions:</strong>
+              </p>
+              <ol style={{ paddingLeft: "20px", margin: 0 }}>
+                <li>Open any UPI payment app</li>
+                <li>Scan the QR code above</li>
+                <li>Verify amount is ₹1000</li>
+                <li>Complete the payment</li>
+                <li>Take a screenshot of payment confirmation</li>
+                <li>Upload the screenshot in the form above</li>
+              </ol>
+            </div>
+
+            <button
+              onClick={() => setShowPaymentModal(false)}
+              style={{
+                padding: "12px 30px",
+                backgroundColor: "#007bff",
+                color: "#fff",
+                border: "none",
+                borderRadius: "5px",
+                fontSize: "14px",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       <section
         className="partner-area"
