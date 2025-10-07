@@ -4,7 +4,7 @@ const Header = () => {
   return (
     <>
       {/* Start preloader */}
-      <div className="loader-wrap">
+      {/* <div className="loader-wrap">
         <div className="preloader">
           <div className="preloader-close">x</div>
           <div id="handle-preloader" className="handle-preloader">
@@ -48,7 +48,7 @@ const Header = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* End preloader */}
       <div className="page-wrapper">
         <header className="main-header main-header-style1">
