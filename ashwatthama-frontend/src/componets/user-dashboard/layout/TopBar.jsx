@@ -69,7 +69,7 @@ const TopBar = () => {
       // Clear user data/tokens
       localStorage.removeItem("authToken");
       localStorage.removeItem("userId");
-      navigate("/login");
+      navigate("/customer-login-page");
     } else {
       navigate(item.path);
     }
