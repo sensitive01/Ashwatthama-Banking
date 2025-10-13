@@ -106,20 +106,6 @@ const UserTable = () => {
     setShowUserModal(true);
   };
 
-  const handleUpdateUser = (updatedUser) => {
-    setUsers(
-      users.map((user) => (user._id === updatedUser._id ? updatedUser : user))
-    );
-    setShowUserModal(false);
-    setSelectedUser(null);
-  };
-
-  const handleSaveNewUser = (newUser) => {
-    setUsers([...users, newUser]);
-    setShowUserModal(false);
-    setSelectedUser(null);
-  };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",

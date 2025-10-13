@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Layout from "./componets/layout/MainLayout";
 import AboutPage from "./componets/about/AboutPage";
 import HomePage from "./componets/home/HomePage";
@@ -10,12 +12,28 @@ import AdminDashboard from "./componets/admin/dashboard/AdminDashboard";
 import UserTable from "./componets/admin/dashboard/UserTable";
 import AdminLayout from "./componets/admin/dashboard/layout/AdminLayout";
 import UserModal from "./componets/admin/dashboard/UserModal";
+import BankingLoginPage from "./componets/customerlogin/BankingLoginPage";
+import Dashboard from "./componets/user-dashboard/dashboard/DashboardHome";
+import TopBar from "./componets/user-dashboard/layout/TopBar";
+import DashboardHome from "./componets/user-dashboard/dashboard/DashboardHome";
+import ChangePassword from "./componets/user-dashboard/changePassword/ChangePassword";
+import SupportPage from "./componets/user-dashboard/support/SupportPage";
+import MyProfile from "./componets/user-dashboard/profile/MyProfile";
 
 function App() {
   return (
     <Router>
       <Routes>
         {/* Main user layout */}
+        <Route path="/customer-login-page" element={<BankingLoginPage />} />
+
+          <Route path="/dashboard" element={<TopBar />}>
+          <Route index element={<DashboardHome />} />
+          <Route path="profile" element={<MyProfile />} />
+          <Route path="change-password" element={<ChangePassword />} />
+          <Route path="support" element={<SupportPage />} />
+        </Route>
+
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/about-us" element={<AboutPage />} />
@@ -44,7 +62,7 @@ function App() {
             </AdminLayout>
           }
         />
-         <Route
+        <Route
           path="/admin/view-users/:id"
           element={
             <AdminLayout>
@@ -53,6 +71,17 @@ function App() {
           }
         />
       </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </Router>
   );
 }

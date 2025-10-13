@@ -92,7 +92,7 @@ const Header = () => {
                         <a href="#">Offers</a>
                       </li>
                       <li>
-                        <a href="#">My Account</a>
+                        <a href="/customer-login-page">Customer Login</a>
                       </li>
                     </ul>
                   </div>
