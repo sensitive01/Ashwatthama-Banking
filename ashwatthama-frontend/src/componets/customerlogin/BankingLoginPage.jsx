@@ -61,7 +61,7 @@ const BankingLoginPage = () => {
           localStorage.setItem("userId", response.data.userId);
           toast.success(response?.data?.message);
           setTimeout(() => {
-            navigate("/user/dashboard");
+            navigate("/dashboard");
           }, 1500);
         } else {
           toast.error(response.response.data.message);
