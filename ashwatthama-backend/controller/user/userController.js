@@ -2,6 +2,11 @@ const SavingsAccount = require("../../model/user/userModel");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
+const crypto = require("crypto");
+const { otpEmailTemplate } = require("../../utils/emailTemplates");
+const sendEmail = require("../../utils/sendEmail");
+
+const otpStore = {};
 
 const createSavingsAccount = async (req, res) => {
   try {
@@ -135,8 +140,8 @@ const createSavingsAccount = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.EMAIL_USER_BANKING,
+        pass: process.env.EMAIL_PASS_BANKING,
       },
       tls: {
         rejectUnauthorized: false,
@@ -448,7 +453,213 @@ const customerChangePassword = async (req, res) => {
   }
 };
 
+const sendOtpForAccountVerification = async (req, res) => {
+  try {
+    const { identifierType, identifier } = req.body;
+
+    if (!identifierType || !identifier) {
+      return res.status(400).json({
+        success: false,
+        message: "Identifier type and value are required",
+      });
+    }
+
+    // Step 1: Find user
+    let user;
+    if (identifierType === "customerId") {
+      user = await SavingsAccount.findOne({ customerId: identifier });
+    } else if (identifierType === "mobile") {
+      user = await SavingsAccount.findOne({ contactNumber: identifier });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid identifier type. Use 'customerId' or 'mobile'.",
+      });
+    }
+
+    // Step 2: Handle user not found
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found for the provided details",
+      });
+    }
+
+    // Step 3: Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    // Step 4: Store OTP with expiry (5 minutes)
+    otpStore[user.email] = {
+      otp,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    };
+
+    // Step 5: Send OTP via email using reusable function
+    await sendEmail(
+      user.email,
+      "Account Verification OTP",
+      otpEmailTemplate(user.firstName, otp)
+    );
+
+    // Step 6: Respond
+    res.status(200).json({
+      success: true,
+      message: `OTP sent successfully to ${user.email}`,
+      email: user.email,
+    });
+  } catch (err) {
+    console.error("Error in sendOtpForAccountVerification:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while sending OTP",
+      error: err.message,
+    });
+  }
+};
+
+const verifyOtpForAccountVerification = async (req, res) => {
+  try {
+    console.log(req.body);
+    const { identifierType, identifier, otp } = req.body; // use body for POST
+
+    if (!identifierType || !identifier || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Identifier type, identifier, and OTP are required",
+      });
+    }
+
+    // 1️⃣ Find user based on identifier type
+    let user;
+    if (identifierType === "customerId") {
+      user = await SavingsAccount.findOne({ customerId: identifier });
+    } else if (identifierType === "mobile") {
+      user = await SavingsAccount.findOne({ contactNumber: identifier });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid identifier type. Use 'customerId' or 'mobile'.",
+      });
+    }
+
+    // 2️⃣ Check if user exists
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found for the provided details",
+      });
+    }
+
+    // 3️⃣ Check if OTP exists for this user's email
+    const storedOtp = otpStore[user.email];
+    if (!storedOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "No OTP found or it has expired. Please request a new OTP.",
+      });
+    }
+
+    // 4️⃣ Check if OTP is expired
+    if (Date.now() > storedOtp.expiresAt) {
+      delete otpStore[user.email]; // remove expired OTP
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired. Please request a new OTP.",
+      });
+    }
+
+    console.log(parseInt(otp), storedOtp.otp);
+
+    // 5️⃣ Verify OTP
+    if (parseInt(otp) !== storedOtp.otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP. Please try again.",
+      });
+    }
+
+    // 6️⃣ OTP verified successfully → remove it from store
+    delete otpStore[user.email];
+
+    // ✅ Send success response
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+      email: user.email,
+      customerId: user.customerId,
+    });
+  } catch (err) {
+    console.error("Error in verifyOtpForAccountVerification:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while verifying OTP",
+      error: err.message,
+    });
+  }
+};
+
+const resetPasswordForAccountLogin = async (req, res) => {
+  try {
+    const { identifierType, identifier, newPassword } = req.body;
+    console.log(identifierType, identifier, newPassword)
+
+    // 1️⃣ Validate inputs
+    if (!identifierType || !identifier || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Identifier type, identifier, and new password are required",
+      });
+    }
+
+    // 2️⃣ Find the user
+    let user;
+    if (identifierType === "customerId") {
+      user = await SavingsAccount.findOne({ customerId: identifier });
+    } else if (identifierType === "mobile") {
+      user = await SavingsAccount.findOne({ contactNumber: identifier });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid identifier type. Use 'customerId' or 'mobile'.",
+      });
+    }
+
+    // 3️⃣ Handle user not found
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found for the provided details",
+      });
+    }
+
+    // 4️⃣ Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 5️⃣ Update the password and mark as changed
+    user.password = hashedPassword;
+    user.isPasswordChanged = true;
+    await user.save();
+
+    // 6️⃣ Send success response
+    res.status(200).json({
+      success: true,
+      message: "Password has been reset successfully.",
+      customerId: user.customerId,
+    });
+  } catch (err) {
+    console.error("Error in changing the password for login:", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while resetting password",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
+  resetPasswordForAccountLogin,
+  verifyOtpForAccountVerification,
+  sendOtpForAccountVerification,
   updateCustomerData,
   customerChangePassword,
   getCustomerFullData,

@@ -520,7 +520,7 @@ const BankingLoginPage = () => {
               Remember me
             </label>
             <a
-              href="#"
+              href="/forgot-password"
               style={{
                 color: "#C41E3A",
                 textDecoration: "none",

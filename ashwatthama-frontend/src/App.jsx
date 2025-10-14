@@ -19,6 +19,7 @@ import DashboardHome from "./componets/user-dashboard/dashboard/DashboardHome";
 import ChangePassword from "./componets/user-dashboard/changePassword/ChangePassword";
 import SupportPage from "./componets/user-dashboard/support/SupportPage";
 import MyProfile from "./componets/user-dashboard/profile/MyProfile";
+import ForgotPasswordPage from "./componets/forgotPassword/ForgotPassword";
 
 function App() {
   return (
@@ -26,6 +27,8 @@ function App() {
       <Routes>
         {/* Main user layout */}
         <Route path="/customer-login-page" element={<BankingLoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
 
           <Route path="/dashboard" element={<TopBar />}>
           <Route index element={<DashboardHome />} />

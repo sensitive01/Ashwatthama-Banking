@@ -29,5 +29,8 @@ userRoute.post("/verify-login",userController.verifyUserLogin);
 userRoute.get("/get-customer-name/:customerId",userController.getCustomerName);
 userRoute.get("/get-customer-full-data/:customerId",userController.getCustomerFullData);
 userRoute.put("/change-customer-password/:customerId",userController.customerChangePassword);
+userRoute.post("/send-otp-for-account-verification",userController.sendOtpForAccountVerification);
+userRoute.post("/verify-otp-for-account-verification",userController.verifyOtpForAccountVerification);
+userRoute.post("/reset-password-for-account-login",userController.resetPasswordForAccountLogin);
 
 module.exports = userRoute;
