@@ -126,26 +126,51 @@ const ChangePassword = () => {
   };
 
   return (
-    <div>
-      <h1
+    <div
+      style={{
+        minHeight: "calc(100vh - 64px)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
+        backgroundColor: "#f9fafb",
+      }}
+    >
+      <div
         style={{
-          fontSize: "32px",
-          fontWeight: 700,
-          color: "#1f2937",
-          marginBottom: "24px",
+          width: "100%",
+          maxWidth: "1000px",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "24px",
+          alignItems: "start",
         }}
       >
-        Change Password
-      </h1>
+        <h1
+          style={{
+            fontSize: "28px",
+            fontWeight: 700,
+            color: "#1f2937",
+            marginBottom: "16px",
+            textAlign: "left",
+          }}
+        >
+          Change Password
+        </h1>
 
-      <div style={{ maxWidth: "600px" }}>
         <div
           style={{
             background: "#fff",
             borderRadius: "12px",
-            padding: "32px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+            padding: "24px",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
             border: "1px solid #e5e7eb",
+            gridColumn: "1",
+            padding: '24px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            border: '1px solid #e5e7eb',
+            gridColumn: '1',
           }}
         >
           <div>
@@ -172,9 +197,8 @@ const ChangePassword = () => {
                   style={{
                     width: "100%",
                     padding: "12px 40px 12px 12px",
-                    border: `2px solid ${
-                      errors.currentPassword ? "#dc2626" : "#e5e7eb"
-                    }`,
+                    border: `2px solid ${errors.currentPassword ? "#dc2626" : "#e5e7eb"
+                      }`,
                     borderRadius: "8px",
                     fontSize: "14px",
                     outline: "none",
@@ -249,9 +273,8 @@ const ChangePassword = () => {
                   style={{
                     width: "100%",
                     padding: "12px 40px 12px 12px",
-                    border: `2px solid ${
-                      errors.newPassword ? "#dc2626" : "#e5e7eb"
-                    }`,
+                    border: `2px solid ${errors.newPassword ? "#dc2626" : "#e5e7eb"
+                      }`,
                     borderRadius: "8px",
                     fontSize: "14px",
                     outline: "none",
@@ -326,9 +349,8 @@ const ChangePassword = () => {
                   style={{
                     width: "100%",
                     padding: "12px 40px 12px 12px",
-                    border: `2px solid ${
-                      errors.confirmPassword ? "#dc2626" : "#e5e7eb"
-                    }`,
+                    border: `2px solid ${errors.confirmPassword ? "#dc2626" : "#e5e7eb"
+                      }`,
                     borderRadius: "8px",
                     fontSize: "14px",
                     outline: "none",
@@ -380,90 +402,29 @@ const ChangePassword = () => {
               )}
             </div>
 
-            {/* Password Requirements */}
-            <div
-              style={{
-                background: "#f9fafb",
-                padding: "16px",
-                borderRadius: "8px",
-                marginBottom: "24px",
-              }}
-            >
-              <h4
-                style={{
-                  fontSize: "14px",
-                  color: "#374151",
-                  marginBottom: "12px",
-                }}
-              >
-                Password Requirements:
-              </h4>
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-              >
-                {passwordRequirements.map((req, index) => {
-                  const isValid = req.test(formData.newPassword);
-                  return (
-                    <div
-                      key={index}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      {formData.newPassword ? (
-                        isValid ? (
-                          <CheckCircle size={16} color="#10b981" />
-                        ) : (
-                          <X size={16} color="#ef4444" />
-                        )
-                      ) : (
-                        <div
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                            borderRadius: "50%",
-                            border: "2px solid #d1d5db",
-                          }}
-                        />
-                      )}
-                      <span
-                        style={{
-                          fontSize: "13px",
-                          color: formData.newPassword
-                            ? isValid
-                              ? "#10b981"
-                              : "#ef4444"
-                            : "#6b7280",
-                        }}
-                      >
-                        {req.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
 
             {/* Submit Button */}
             <button
-              type="button"
+              type="submit"
               onClick={handleSubmit}
               disabled={isLoading}
               style={{
                 width: "100%",
-                padding: "14px",
-                background: isLoading
-                  ? "#9ca3af"
-                  : "linear-gradient(135deg, #8B1538 0%, #C41E3A 100%)",
-                color: "#fff",
+                padding: "14px 24px",
+                backgroundColor: isLoading ? "#9ca3af" : "#C41E3A",
+                color: "white",
                 border: "none",
                 borderRadius: "8px",
-                fontSize: "15px",
+                fontSize: "16px",
                 fontWeight: 600,
                 cursor: isLoading ? "not-allowed" : "pointer",
-                transition: "opacity 0.2s",
+                transition: "all 0.2s",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                marginTop: "16px",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
               }}
               onMouseEnter={(e) =>
                 !isLoading && (e.currentTarget.style.opacity = "0.9")
@@ -476,8 +437,77 @@ const ChangePassword = () => {
             </button>
           </div>
         </div>
+
+        {/* Password Requirements Section */}
+        <div
+          style={{
+            background: '#fff',
+            borderRadius: '12px',
+            padding: '24px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            border: '1px solid #e5e7eb',
+            position: 'sticky',
+            top: '20px',
+          }}
+        >
+          <h4
+            style={{
+              fontSize: '16px',
+              color: '#1f2937',
+              marginBottom: '16px',
+              fontWeight: 600,
+            }}
+          >
+            Password Requirements:
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {passwordRequirements.map((req, index) => {
+              const isValid = req.test(formData.newPassword);
+              return (
+                <div
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  {formData.newPassword ? (
+                    isValid ? (
+                      <CheckCircle size={16} color="#10b981" />
+                    ) : (
+                      <X size={16} color="#ef4444" />
+                    )
+                  ) : (
+                    <div
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        border: '2px solid #d1d5db',
+                      }}
+                    />
+                  )}
+                  <span
+                    style={{
+                      fontSize: '13px',
+                      color: formData.newPassword
+                        ? isValid
+                          ? '#10b981'
+                          : '#ef4444'
+                        : '#6b7280',
+                    }}
+                  >
+                    {req.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
+
   );
 };
 

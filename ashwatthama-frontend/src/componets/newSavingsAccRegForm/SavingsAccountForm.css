@@ -1,0 +1,951 @@
+/* ===================================
+   Scoped Savings Account Form Styles
+   Won't affect other components!
+   =================================== */
+
+/* Main wrapper - all styles scoped under this */
+.savings-account-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+  gap: 0;
+}
+
+.savings-account-container *,
+.savings-account-container *::before,
+.savings-account-container *::after {
+  box-sizing: border-box;
+}
+
+/* ===================================
+   Left Section - Image/Visual
+   =================================== */
+.savings-account-container .left-section {
+  flex: 0 0 50%;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)),
+    url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800') center/cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  position: relative;
+}
+
+.savings-account-container .left-section-wrapper {
+  width: 100%;
+  max-width: 550px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.savings-account-container .left-content {
+  color: white;
+  width: 100%;
+  text-align: left;
+}
+
+.savings-account-container .left-content h1 {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  line-height: 1.2;
+  margin-top: 0;
+  letter-spacing: -0.5px;
+}
+
+.savings-account-container .left-content > p {
+  font-size: 18px;
+  margin-bottom: 40px;
+  margin-top: 0;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.savings-account-container .features {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.savings-account-container .feature-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 16px;
+}
+
+.savings-account-container .feature-item i {
+  font-size: 24px;
+  color: #4caf50;
+}
+
+/* ===================================
+   Right Section - Form
+   =================================== */
+.savings-account-container .right-section {
+  flex: 0 0 50%;
+  background: #f5f0e8;
+  padding: 40px 60px;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.savings-account-container .form-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+.savings-account-container .form-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.savings-account-container .form-header h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  margin-top: 0;
+}
+
+.savings-account-container .form-header p {
+  font-size: 16px;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+/* ===================================
+   Alert Messages
+   =================================== */
+.savings-account-container .alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  margin-bottom: 25px;
+  border-radius: 8px;
+  font-size: 14px;
+  animation: slideDown 0.3s ease;
+}
+
+.savings-account-container .alert i {
+  font-size: 20px;
+  margin-right: 12px;
+}
+
+.savings-account-container .alert-success {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.savings-account-container .alert-error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.savings-account-container .alert-info {
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+.savings-account-container .alert-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+  margin-left: 10px;
+}
+
+/* ===================================
+   Progress Steps
+   =================================== */
+.savings-account-container .progress-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.savings-account-container .progress-steps::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ddd;
+  z-index: 0;
+}
+
+.savings-account-container .step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.savings-account-container .step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #999;
+  transition: all 0.3s ease;
+}
+
+.savings-account-container .step-name {
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+  text-align: center;
+}
+
+.savings-account-container .step.active .step-icon {
+  background: #d32f2f;
+  border-color: #d32f2f;
+  color: white;
+  transform: scale(1.1);
+}
+
+.savings-account-container .step.active .step-name {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.savings-account-container .step.completed .step-icon {
+  background: #4caf50;
+  border-color: #4caf50;
+  color: white;
+}
+
+.savings-account-container .step.completed .step-name {
+  color: #4caf50;
+}
+
+/* ===================================
+   Form Content
+   =================================== */
+.savings-account-container .step-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+  min-height: 400px;
+}
+
+.savings-account-container .step-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  margin-top: 0;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Form Groups */
+.savings-account-container .form-group {
+  margin-bottom: 20px;
+}
+
+.savings-account-container .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.savings-account-container .form-group .required {
+  color: #d32f2f;
+  margin-left: 3px;
+}
+
+.savings-account-container .form-group small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+/* Form Row - Two columns */
+.savings-account-container .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Input Fields */
+.savings-account-container .form-group input[type="text"],
+.savings-account-container .form-group input[type="email"],
+.savings-account-container .form-group input[type="tel"],
+.savings-account-container .form-group select {
+  width: 100%;
+  height: 50px;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.savings-account-container .input-with-icon {
+  position: relative;
+}
+
+.savings-account-container .input-with-icon i {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.savings-account-container .input-with-icon input {
+  padding-right: 45px;
+}
+
+.savings-account-container .form-group input:focus,
+.savings-account-container .form-group select:focus {
+  outline: none;
+  border-color: #d32f2f;
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+.savings-account-container .file-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #f9f9f9;
+  transition: all 0.3s ease;
+}
+
+.savings-account-container .file-input:hover {
+  border-color: #d32f2f;
+  background: #fff5f5;
+}
+
+/* Payment Notice */
+.savings-account-container .payment-notice {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+
+.savings-account-container .payment-notice i {
+  font-size: 32px;
+  color: #856404;
+}
+
+.savings-account-container .payment-notice strong {
+  font-size: 18px;
+  color: #856404;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.savings-account-container .payment-notice p {
+  color: #856404;
+  font-size: 14px;
+  margin: 0;
+}
+
+.savings-account-container .pay-button {
+  width: 100%;
+  padding: 15px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.savings-account-container .pay-button:hover {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* ===================================
+   Navigation Buttons
+   =================================== */
+.savings-account-container .form-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.savings-account-container .btn {
+  flex: 1;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.savings-account-container .btn-primary {
+  background: #d32f2f;
+  color: white;
+}
+
+.savings-account-container .btn-primary:hover {
+  background: #b71c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+}
+
+.savings-account-container .btn-secondary {
+  background: #6c757d;
+  color: white;
+  flex: 0.5;
+}
+
+.savings-account-container .btn-secondary:hover {
+  background: #5a6268;
+}
+
+.savings-account-container .btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.savings-account-container .btn-success:hover {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.savings-account-container .btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ===================================
+   Payment Modal
+   =================================== */
+.savings-account-container .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease;
+}
+
+.savings-account-container .modal-content {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  max-width: 550px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+.savings-account-container .modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  color: #666;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.savings-account-container .modal-close:hover {
+  color: #d32f2f;
+}
+
+.savings-account-container .modal-content h3 {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 20px;
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+/* Timer Display */
+.savings-account-container .timer-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  background: #e7f3ff;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.savings-account-container .timer-display.warning {
+  background: #fff3cd;
+  border-color: #ffc107;
+  color: #856404;
+}
+
+.savings-account-container .timer-display i {
+  font-size: 20px;
+}
+
+/* Payment Status */
+.savings-account-container .payment-status {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.savings-account-container .payment-status.pending {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  color: #856404;
+}
+
+.savings-account-container .payment-status.success {
+  background: #d4edda;
+  border: 2px solid #28a745;
+  color: #155724;
+}
+
+.savings-account-container .payment-status.failed {
+  background: #f8d7da;
+  border: 2px solid #dc3545;
+  color: #721c24;
+}
+
+/* Payment Toggle */
+.savings-account-container .payment-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.savings-account-container .payment-toggle button {
+  flex: 1;
+  padding: 12px 20px;
+  background: #f8f9fa;
+  color: #333;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.savings-account-container .payment-toggle button.active {
+  background: #007bff;
+  color: white;
+}
+
+.savings-account-container .payment-toggle button:hover:not(.active) {
+  background: #e9ecef;
+}
+
+/* QR Section */
+.savings-account-container .qr-section {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.savings-account-container .qr-code {
+  max-width: 300px;
+  width: 100%;
+  height: auto;
+  border: 3px solid #007bff;
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.savings-account-container .qr-instruction {
+  font-weight: 600;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.savings-account-container .qr-instruction i {
+  color: #007bff;
+}
+
+/* UPI Section */
+.savings-account-container .upi-section {
+  margin-bottom: 25px;
+}
+
+.savings-account-container .merchant-info {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.savings-account-container .merchant-info p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.savings-account-container .upi-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.savings-account-container .upi-input-group input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.savings-account-container .upi-input-group input.error {
+  border-color: #dc3545;
+}
+
+.savings-account-container .upi-input-group input.success {
+  border-color: #28a745;
+}
+
+.savings-account-container .verify-btn {
+  padding: 12px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.savings-account-container .verify-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.savings-account-container .error-message {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.savings-account-container .verified-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: #d4edda;
+  border: 2px solid #c3e6cb;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.savings-account-container .verified-message i {
+  font-size: 24px;
+  color: #155724;
+}
+
+.savings-account-container .verified-message p {
+  font-size: 12px;
+  color: #155724;
+  margin: 0 0 4px 0;
+  font-weight: 600;
+}
+
+.savings-account-container .verified-message strong {
+  font-size: 16px;
+  color: #155724;
+}
+
+.savings-account-container .send-payment-btn {
+  width: 100%;
+  padding: 14px 30px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.savings-account-container .send-payment-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Payment Instructions */
+.savings-account-container .payment-instructions {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.savings-account-container .payment-instructions h4 {
+  margin-bottom: 10px;
+  margin-top: 0;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.savings-account-container .payment-instructions h4 i {
+  color: #007bff;
+}
+
+.savings-account-container .payment-instructions ol {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.savings-account-container .payment-instructions li {
+  line-height: 1.8;
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+@media (max-width: 1024px) {
+  .savings-account-container .left-content h1 {
+    font-size: 36px;
+  }
+  
+  .savings-account-container .left-section {
+    flex: 0 0 50%;
+    padding: 40px 30px;
+  }
+  
+  .savings-account-container .left-section-wrapper {
+    max-width: 480px;
+    padding: 0 15px;
+  }
+  
+  .savings-account-container .right-section {
+    flex: 0 0 50%;
+    padding: 30px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .savings-account-container {
+    flex-direction: column;
+  }
+
+  .savings-account-container .left-section {
+    flex: 0 0 auto;
+    min-height: 350px;
+    padding: 40px 20px;
+  }
+
+  .savings-account-container .left-section-wrapper {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .savings-account-container .left-content {
+    max-width: 100%;
+  }
+
+  .savings-account-container .left-content h1 {
+    font-size: 32px;
+  }
+
+  .savings-account-container .right-section {
+    flex: 1;
+    padding: 20px;
+  }
+
+  .savings-account-container .form-header h2 {
+    font-size: 24px;
+  }
+
+  .savings-account-container .progress-steps {
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  .savings-account-container .step-name {
+    font-size: 10px;
+  }
+
+  .savings-account-container .step-icon {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .savings-account-container .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .savings-account-container .step-content {
+    padding: 20px;
+  }
+
+  .savings-account-container .form-navigation {
+    flex-direction: column;
+  }
+
+  .savings-account-container .btn-secondary {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .savings-account-container .left-content h1 {
+    font-size: 28px;
+  }
+
+  .savings-account-container .form-header h2 {
+    font-size: 20px;
+  }
+
+  .savings-account-container .step-content {
+    padding: 15px;
+    min-height: 300px;
+  }
+
+  .savings-account-container .modal-content {
+    padding: 20px;
+  }
+}
+
+/* ===================================
+   Animations
+   =================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ===================================
+   Scrollbar Styling
+   =================================== */
+.savings-account-container .right-section::-webkit-scrollbar,
+.savings-account-container .modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.savings-account-container .right-section::-webkit-scrollbar-track,
+.savings-account-container .modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.savings-account-container .right-section::-webkit-scrollbar-thumb,
+.savings-account-container .modal-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.savings-account-container .right-section::-webkit-scrollbar-thumb:hover,
+.savings-account-container .modal-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

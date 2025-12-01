@@ -20,6 +20,9 @@ import ChangePassword from "./componets/user-dashboard/changePassword/ChangePass
 import SupportPage from "./componets/user-dashboard/support/SupportPage";
 import MyProfile from "./componets/user-dashboard/profile/MyProfile";
 import ForgotPasswordPage from "./componets/forgotPassword/ForgotPassword";
+import NewEnquiryPage from "./componets/admin/dashboard/NewEnquiryPage";
+import FaqPage from "./componets/faqpage/FaqPage";
+import CareerPage from "./componets/career/CareerPage";
 
 function App() {
   return (
@@ -30,7 +33,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
 
-          <Route path="/dashboard" element={<TopBar />}>
+        <Route path="/dashboard" element={<TopBar />}>
           <Route index element={<DashboardHome />} />
           <Route path="profile" element={<MyProfile />} />
           <Route path="change-password" element={<ChangePassword />} />
@@ -46,6 +49,8 @@ function App() {
             element={<NewSavingsAccountRegForm />}
           />
           <Route path="/savings-account" element={<SavingsAccount />} />
+          <Route path="/faq-page" element={<FaqPage />} />
+          <Route path="/career-page" element={<CareerPage />} />
         </Route>
 
         <Route path="/admin/admin-login" element={<AdminLogin />} />
@@ -62,6 +67,14 @@ function App() {
           element={
             <AdminLayout>
               <UserTable />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/enquiries"
+          element={
+            <AdminLayout>
+              <NewEnquiryPage />
             </AdminLayout>
           }
         />

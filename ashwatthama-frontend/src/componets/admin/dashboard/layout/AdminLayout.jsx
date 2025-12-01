@@ -22,7 +22,9 @@ import {
   Eye,
   Users,
   Plus,
+  MessageSquare, // ADD THIS IMPORT
 } from "lucide-react";
+import bankLogo from "../../../../../public/assets/images/resources/amf - light.png";
 
 // Admin Layout Component (Sidebar + Top Bar)
 const AdminLayout = ({ children }) => {
@@ -36,6 +38,8 @@ const AdminLayout = ({ children }) => {
   const handleLogout = () => {
     console.log("Logging out...");
     // Add your logout logic here
+    localStorage.clear();
+    navigate("/admin/login");
   };
 
   const menuItems = [
@@ -55,7 +59,13 @@ const AdminLayout = ({ children }) => {
       id: "new-users",
       label: "New Users",
       icon: <UserPlus size={20} />,
-      path: "/new-users",
+      path: "/admin/new-users",
+    },
+    {
+      id: "enquiries", // CHANGED ID
+      label: "Enquiries", // CHANGED LABEL
+      icon: <MessageSquare size={20} />, // CHANGED ICON
+      path: "/admin/enquiries", // CHANGED PATH
     },
   ];
 
@@ -81,9 +91,8 @@ const AdminLayout = ({ children }) => {
 
       {/* Sidebar */}
       <div
-        className={`${
-          isSidebarOpen ? "w-64" : "w-20"
-        } bg-purple-900 bg-opacity-40 backdrop-blur-xl border-r-2 border-purple-500 border-opacity-40 transition-all duration-300 flex flex-col relative z-10`}
+        className={`${isSidebarOpen ? "w-64" : "w-20"
+          } bg-purple-900 bg-opacity-40 backdrop-blur-xl border-r-2 border-purple-500 border-opacity-40 transition-all duration-300 flex flex-col relative z-10`}
       >
         {/* Logo Section */}
         <div className="p-3 border-b border-purple-500 border-opacity-40">
@@ -91,11 +100,10 @@ const AdminLayout = ({ children }) => {
             {isSidebarOpen ? (
               <div className="flex items-center space-x-3">
                 <img
-                  src="../../../../../public/assets/images/resources/amf - light.png"
+                  src={bankLogo}
                   alt="AMF Logo"
                   className="w-20 h-10 rounded-lg object-cover"
                 />
-               
               </div>
             ) : (
               <img
@@ -115,13 +123,11 @@ const AdminLayout = ({ children }) => {
               <Link
                 key={item.id}
                 to={item.path}
-                className={`w-full flex items-center ${
-                  isSidebarOpen ? "justify-start px-4" : "justify-center"
-                } py-3 rounded-xl transition-all duration-200 ${
-                  isActive
+                className={`w-full flex items-center ${isSidebarOpen ? "justify-start px-4" : "justify-center"
+                  } py-3 rounded-xl transition-all duration-200 ${isActive
                     ? "bg-blue-600 text-white shadow-lg shadow-blue-500/50"
                     : "text-purple-200 hover:bg-purple-800 hover:bg-opacity-50"
-                }`}
+                  }`}
               >
                 <span className={isActive ? "text-white" : ""}>
                   {item.icon}
@@ -183,9 +189,8 @@ const AdminLayout = ({ children }) => {
                 </div>
                 <ChevronDown
                   size={16}
-                  className={`text-purple-200 transition-transform ${
-                    showProfileMenu ? "rotate-180" : ""
-                  }`}
+                  className={`text-purple-200 transition-transform ${showProfileMenu ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 

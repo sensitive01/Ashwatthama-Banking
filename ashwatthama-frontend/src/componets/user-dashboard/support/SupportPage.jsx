@@ -1,6 +1,7 @@
 // Support.jsx
 import React, { useState } from "react";
 import { Phone, Mail, Headphones } from "lucide-react";
+import { userSubmitContactUsForm } from "../../../api/service/axiosService";
 
 const SupportPage = () => {
   const [formData, setFormData] = useState({
@@ -29,22 +30,16 @@ const SupportPage = () => {
       setIsSubmitting(true);
 
       // Replace with your actual API endpoint
-      // const response = await fetch("https://your-api.com/support", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     "Authorization": `Bearer ${localStorage.getItem("authToken")}`
-      //   },
-      //   body: JSON.stringify(formData)
-      // });
+      const response = await userSubmitContactUsForm(formData)
+      if (response.status === 200) {
+        console.log(response.data.message)
+      }
 
-      // if (!response.ok) throw new Error("Failed to send message");
 
-      // Simulated API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      alert("Message sent successfully! Our team will get back to you soon.");
-      
+
+
+
       // Reset form
       setFormData({
         subject: "",
@@ -106,8 +101,8 @@ const SupportPage = () => {
               borderRadius: "10px",
               transition: "box-shadow 0.2s"
             }}
-            onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"}
-            onMouseLeave={(e) => e.currentTarget.style.boxShadow = "none"}
+              onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"}
+              onMouseLeave={(e) => e.currentTarget.style.boxShadow = "none"}
             >
               <div style={{
                 width: "48px",
@@ -142,8 +137,8 @@ const SupportPage = () => {
               borderRadius: "10px",
               transition: "box-shadow 0.2s"
             }}
-            onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"}
-            onMouseLeave={(e) => e.currentTarget.style.boxShadow = "none"}
+              onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"}
+              onMouseLeave={(e) => e.currentTarget.style.boxShadow = "none"}
             >
               <div style={{
                 width: "48px",

@@ -1,6 +1,72 @@
-import React from "react";
+import React, { useState } from "react";
+import { toast } from "react-toastify";
+import { userSubmitContactUsForm } from "../../api/service/axiosService";
 
 const Footer = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validation
+    if (!formData.name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+    if (!formData.email.trim()) {
+      toast.error("Please enter your email");
+      return;
+    }
+    if (!formData.phone.trim() || formData.phone.length !== 10) {
+      toast.error("Please enter a valid 10-digit phone number");
+      return;
+    }
+    if (!formData.message.trim()) {
+      toast.error("Please enter your message");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const response = await userSubmitContactUsForm(formData);
+
+      if (response.status === 201) {
+        toast.success(response.data.message || "Message sent successfully!");
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
+      } else {
+        toast.error(response.response?.data?.message || "Failed to send message");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error(error.response?.data?.message || "Failed to send message. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       {/*Start Main Contact Form Area*/}
@@ -96,19 +162,19 @@ const Footer = () => {
                   id="contact-form"
                   name="contact_form"
                   className="default-form2"
-                  action=""
-                  method="post"
+                  onSubmit={handleSubmit}
                 >
                   <div className="form-group">
                     <label>Name</label>
                     <div className="input-box">
                       <input
                         type="text"
-                        name="form_name"
-                        id="formName"
-                        maxLength={20}
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        maxLength={50}
                         placeholder="Enter your name"
-                        required=""
+                        required
                       />
                     </div>
                   </div>
@@ -117,10 +183,11 @@ const Footer = () => {
                     <div className="input-box">
                       <input
                         type="email"
-                        name="form_email"
-                        id="formEmail"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
                         placeholder="Enter your email ID"
-                        required=""
+                        required
                       />
                     </div>
                   </div>
@@ -129,23 +196,24 @@ const Footer = () => {
                     <div className="input-box">
                       <input
                         type="text"
-                        name="form_phone"
-                        defaultValue=""
-                        id="formPhone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
                         pattern="[0-9]{10}"
                         maxLength={10}
                         placeholder="Enter your phone number"
+                        required
                       />
                     </div>
                   </div>
                   <div className="form-group">
-                    <label>Your Message</label>
+                    <label>Subject</label>
                     <div className="input-box">
                       <input
                         type="text"
-                        name="form_subject"
-                        defaultValue=""
-                        id="formSubject"
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleInputChange}
                         placeholder="Subject"
                       />
                     </div>
@@ -154,28 +222,27 @@ const Footer = () => {
                     <label>Message</label>
                     <div className="input-box">
                       <textarea
-                        name="form_message"
-                        id="formMessage"
-                        placeholder=""
-                        required=""
-                        defaultValue={""}
+                        name="message"
+                        value={formData.message}
+                        onChange={handleInputChange}
+                        placeholder="Type your message here..."
+                        required
                       />
                     </div>
                   </div>
                   <div className="button-box">
-                    <input
-                      id="form_botcheck"
-                      name="form_botcheck"
-                      className="form-control"
-                      type="hidden"
-                      defaultValue=""
-                    />
                     <button
                       className="btn-one"
                       type="submit"
-                      data-loading-text="Please wait..."
+                      disabled={isSubmitting}
+                      style={{
+                        opacity: isSubmitting ? 0.7 : 1,
+                        cursor: isSubmitting ? "not-allowed" : "pointer",
+                      }}
                     >
-                      <span className="txt">send a message</span>
+                      <span className="txt">
+                        {isSubmitting ? "Sending..." : "Send a Message"}
+                      </span>
                     </button>
                   </div>
                 </form>

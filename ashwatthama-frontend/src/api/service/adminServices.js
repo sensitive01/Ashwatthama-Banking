@@ -22,3 +22,13 @@ export const deleteUserData = async (id) => {
   const response = await axiosInstance.delete(`/admin/delete-user-data/${id}`);
   return response;
 };
+
+export const getAllEnquiries = async () => {
+  const response = await axiosInstance.get(`/admin/get-all-enquiries`);
+  return response;
+};
+
+export const deleteEnquiry = async (id) => {
+  const response = await axiosInstance.delete(`/admin/delete-enquiry/${id}`);
+  return response;
+};

@@ -70,7 +70,7 @@ export const candidateForgotPassowrd = async (identifierType, identifier) => {
 };
 
 
-export const verifyChangePasswordOtp = async (identifierType, identifier,otp) => {
+export const verifyChangePasswordOtp = async (identifierType, identifier, otp) => {
   const response = await axiosInstance.post(`/user/verify-otp-for-account-verification`, {
     identifierType,
     identifier,
@@ -79,11 +79,18 @@ export const verifyChangePasswordOtp = async (identifierType, identifier,otp) =>
   return response;
 };
 
-export const resetLoginPassword = async (identifierType, identifier,newPassword) => {
+export const resetLoginPassword = async (identifierType, identifier, newPassword) => {
   const response = await axiosInstance.post(`/user/reset-password-for-account-login`, {
     identifierType,
     identifier,
     newPassword
   });
+  return response;
+};
+
+export const userSubmitContactUsForm = async (formData) => {
+  const response = await axiosInstance.post(`/user/user-submit-contact-us-form`,
+    { formData}
+  );
   return response;
 };

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { sendFormData } from "../../api/service/axiosService";
-import SavingsForm from "./SavingsForm";
-// import formImage from ".."
+import "./SavingsAccountForm.css";
 
 const SavingsAccountForm = () => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -51,6 +51,14 @@ const SavingsAccountForm = () => {
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [transactionId, setTransactionId] = useState("");
 
+  const steps = [
+    { id: 1, name: "Personal Info", icon: "fas fa-user" },
+    { id: 2, name: "Identity", icon: "fas fa-id-card" },
+    { id: 3, name: "Address", icon: "fas fa-map-marker-alt" },
+    { id: 4, name: "Nominee", icon: "fas fa-user-friends" },
+    { id: 5, name: "Payment", icon: "fas fa-credit-card" },
+  ];
+
   // Timer effect
   useEffect(() => {
     let interval = null;
@@ -92,7 +100,7 @@ const SavingsAccountForm = () => {
   const generateUPIQRCode = () => {
     const upiId = "9743474558@yescred";
     const payeeName = "Finance";
-    const amount = "1";
+    const amount = "1000";
     const transactionNote = "Savings Account Registration Fee";
 
     const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(
@@ -115,32 +123,17 @@ const SavingsAccountForm = () => {
     setTimerActive(true);
   };
 
-  // Basic UPI ID Format Validation
   const validateUpiFormat = (upiId) => {
     const upiRegex = /^[\w.-]+@[\w]+$/;
-
-    if (!upiId.trim()) {
-      return "UPI ID is required";
-    }
-
-    if (!upiRegex.test(upiId)) {
+    if (!upiId.trim()) return "UPI ID is required";
+    if (!upiRegex.test(upiId))
       return "Invalid UPI ID format. Example: 9876543210@paytm";
-    }
-
-    if (!upiId.includes("@")) {
-      return "UPI ID must contain @ symbol";
-    }
-
-    const [username, provider] = upiId.split("@");
-
-    if (username.length < 3) {
-      return "Username must be at least 3 characters";
-    }
-
+    if (!upiId.includes("@")) return "UPI ID must contain @ symbol";
+    const [username] = upiId.split("@");
+    if (username.length < 3) return "Username must be at least 3 characters";
     return "";
   };
 
-  // Verify UPI ID and fetch account holder name
   const verifyUpiId = async (upiId) => {
     setIsVerifyingUpi(true);
     setUpiErrors("");
@@ -148,33 +141,17 @@ const SavingsAccountForm = () => {
     setUpiAccountName("");
 
     try {
-      // Call your backend API to verify UPI ID
-      // const response = await fetch('/api/verify-upi', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ upiId: upiId }),
-      // });
-
-      // const data = await response.json();
-
-      // if (response.ok && data.success) {
-      //   setIsUpiVerified(true);
-      //   setUpiAccountName(data.accountName);
-      //   setUpiErrors("");
-      // } else {
-      //   setUpiErrors(data.message || "Unable to verify UPI ID. Please check and try again.");
-      //   setIsUpiVerified(false);
-      // }
-      setIsUpiVerified(true);
-      setUpiAccountName("Aswin");
-      setUpiErrors("");
+      // Simulated verification - replace with actual API call
+      setTimeout(() => {
+        setIsUpiVerified(true);
+        setUpiAccountName("Aswin");
+        setUpiErrors("");
+        setIsVerifyingUpi(false);
+      }, 1000);
     } catch (error) {
       console.error("Error verifying UPI:", error);
       setUpiErrors("Error verifying UPI ID. Please try again.");
       setIsUpiVerified(false);
-    } finally {
       setIsVerifyingUpi(false);
     }
   };
@@ -184,7 +161,6 @@ const SavingsAccountForm = () => {
     setUserUpiId(value);
     setIsUpiVerified(false);
     setUpiAccountName("");
-
     if (value) {
       const error = validateUpiFormat(value);
       setUpiErrors(error);
@@ -208,37 +184,30 @@ const SavingsAccountForm = () => {
       return;
     }
 
-    // Ask for notification permission
     if ("Notification" in window && Notification.permission === "default") {
       await Notification.requestPermission();
     }
 
     try {
       setPaymentStatus("pending");
-
-      // Prepare UPI link (Intent URL)
       const payeeUpiId = "9743474558@yescred";
       const payeeName = "SensitiveTechnologies";
-      const amount = 1;
+      const amount = 1000;
       const note = "Savings Account Registration Fee";
 
-      // Encode note and name safely for URL
       const upiLink = `upi://pay?pa=${encodeURIComponent(
         payeeUpiId
       )}&pn=${encodeURIComponent(
         payeeName
       )}&am=${amount}&tn=${encodeURIComponent(note)}`;
 
-      // Open UPI app
       window.location.href = upiLink;
 
-      // Update status and UI
       setAlertMessage({
         type: "info",
         message: `Opening your UPI app... Please complete the payment of ₹${amount}.`,
       });
 
-      // Optional: Start countdown or manual verification
       setPaymentStatus("waiting_for_user_action");
     } catch (error) {
       console.error("Error initiating UPI payment:", error);
@@ -249,102 +218,12 @@ const SavingsAccountForm = () => {
     }
   };
 
-  // Poll backend for payment status
-  const pollPaymentStatus = async (txnId) => {
-    const maxAttempts = 60;
-    let attempts = 0;
-
-    const interval = setInterval(async () => {
-      attempts++;
-
-      try {
-        const response = await fetch(
-          `/api/check-payment-status?transactionId=${txnId}`
-        );
-        const data = await response.json();
-
-        if (data.status === "SUCCESS") {
-          clearInterval(interval);
-          setPaymentStatus("success");
-          setAlertMessage({
-            type: "success",
-            message: `Payment successful! Transaction ID: ${txnId}`,
-          });
-
-          if (
-            "Notification" in window &&
-            Notification.permission === "granted"
-          ) {
-            new Notification("Payment Successful! ✓", {
-              body: `₹1000 received from ${upiAccountName}. TXN: ${txnId}`,
-              icon: "https://cdn-icons-png.flaticon.com/512/5290/5290058.png",
-            });
-          }
-        } else if (data.status === "FAILED") {
-          clearInterval(interval);
-          setPaymentStatus("failed");
-          setAlertMessage({
-            type: "error",
-            message: "Payment failed. Please try again.",
-          });
-        } else if (attempts >= maxAttempts) {
-          clearInterval(interval);
-          setPaymentStatus("timeout");
-          setAlertMessage({
-            type: "error",
-            message: "Payment request timed out. Please try again.",
-          });
-        }
-      } catch (error) {
-        console.error("Error checking payment status:", error);
-      }
-    }, 2000);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setAlertMessage({ type: "", message: "" });
-
-    const requiredFields = [
-      "firstName",
-      "lastName",
-      "aadharNumber",
-      "contactNumber",
-      "email",
-      "idProofType",
-      "idProofNumber",
-      "idProofFile",
-      "addressLine",
-      "area",
-      "city",
-      "state",
-      "pincode",
-      "addressProofType",
-      "addressProofNumber",
-      "addressProofFile",
-      "photoFile",
-      "occupationType",
-      "nomineeName",
-      "nomineeContact",
-      "nomineeRelation",
-      "paymentProofFile",
-    ];
-
-    const missingFields = requiredFields.filter((field) => !formData[field]);
-
-    // if (missingFields.length > 0) {
-    //   setAlertMessage({
-    //     type: "error",
-    //     message: "Please fill all required fields before submitting.",
-    //   });
-    //   window.scrollTo({ top: 0, behavior: "smooth" });
-    //   return;
-    // }
-
     setIsSubmitting(true);
 
     const formDataToSend = new FormData();
-
     Object.keys(formData).forEach((key) => {
       if (formData[key] !== null && formData[key] !== "") {
         formDataToSend.append(key, formData[key]);
@@ -361,6 +240,7 @@ const SavingsAccountForm = () => {
           "Your savings account registration has been submitted successfully! Our team will contact you shortly.",
       });
 
+      // Reset form
       setFormData({
         firstName: "",
         lastName: "",
@@ -387,1041 +267,693 @@ const SavingsAccountForm = () => {
         paymentProofFile: null,
       });
 
-      document.querySelectorAll('input[type="file"]').forEach((input) => {
-        input.value = "";
-      });
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setCurrentStep(1);
     } catch (error) {
       console.error("Error submitting form:", error);
-
       setAlertMessage({
         type: "error",
         message:
           error.response?.data?.message ||
           "Failed to submit the form. Please try again or contact support.",
       });
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const inputStyle = {
-    paddingLeft: "45px",
-    width: "100%",
-    height: "50px",
-    border: "1px solid #ddd",
-    borderRadius: "5px",
-    fontSize: "14px",
-    backgroundColor: "#fff",
+  const nextStep = () => {
+    if (currentStep < 5) setCurrentStep(currentStep + 1);
   };
 
-  const selectStyle = {
-    width: "100%",
-    height: "50px",
-    border: "1px solid #ddd",
-    borderRadius: "5px",
-    padding: "0 15px",
-    fontSize: "14px",
-    backgroundColor: "#fff",
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const fileInputStyle = {
-    width: "100%",
-    height: "50px",
-    border: "1px solid #ddd",
-    borderRadius: "5px",
-    padding: "10px",
-    fontSize: "14px",
-    backgroundColor: "#fff",
-  };
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="step-content">
+            <h3 className="step-title">Personal Information</h3>
+            <div className="form-row">
+              <div className="form-group">
+                <label>First Name <span className="required">*</span></label>
+                <div className="input-with-icon">
+                  <i className="fas fa-user"></i>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    placeholder="Enter your first name"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Last Name <span className="required">*</span></label>
+                <div className="input-with-icon">
+                  <i className="fas fa-user"></i>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    placeholder="Enter your last name"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
 
-  const iconStyle = {
-    position: "absolute",
-    left: "15px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    pointerEvents: "none",
-    color: "#666",
+            <div className="form-row">
+              <div className="form-group">
+                <label>Email <span className="required">*</span></label>
+                <div className="input-with-icon">
+                  <i className="fas fa-envelope"></i>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Phone Number <span className="required">*</span></label>
+                <div className="input-with-icon">
+                  <i className="fas fa-phone"></i>
+                  <input
+                    type="tel"
+                    name="contactNumber"
+                    value={formData.contactNumber}
+                    onChange={handleInputChange}
+                    placeholder="Enter your phone number"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Aadhar Number <span className="required">*</span></label>
+              <div className="input-with-icon">
+                <i className="fas fa-id-card"></i>
+                <input
+                  type="text"
+                  name="aadharNumber"
+                  value={formData.aadharNumber}
+                  onChange={handleInputChange}
+                  placeholder="Enter your Aadhar number"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="step-content">
+            <h3 className="step-title">Identity Verification</h3>
+            <div className="form-group">
+              <label>ID Proof Type <span className="required">*</span></label>
+              <select
+                name="idProofType"
+                value={formData.idProofType}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select ID Proof Type</option>
+                <option value="Aadhar Card">Aadhar Card</option>
+                <option value="PAN Card">PAN Card</option>
+                <option value="Voter ID">Voter ID</option>
+                <option value="Driving License">Driving License</option>
+                <option value="Passport">Passport</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>ID Proof Number <span className="required">*</span></label>
+              <div className="input-with-icon">
+                <i className="fas fa-file-alt"></i>
+                <input
+                  type="text"
+                  name="idProofNumber"
+                  value={formData.idProofNumber}
+                  onChange={handleInputChange}
+                  placeholder="Enter ID proof number"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Upload ID Proof <span className="required">*</span></label>
+              <input
+                type="file"
+                name="idProofFile"
+                onChange={(e) => handleFileChange(e, "idProofFile")}
+                accept=".pdf,.jpg,.jpeg,.png"
+                className="file-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Upload Photo <span className="required">*</span></label>
+              <input
+                type="file"
+                name="photoFile"
+                onChange={(e) => handleFileChange(e, "photoFile")}
+                accept="image/*"
+                className="file-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Occupation Type <span className="required">*</span></label>
+              <select
+                name="occupationType"
+                value={formData.occupationType}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Occupation</option>
+                <option value="Salaried">Salaried</option>
+                <option value="Self Employed">Self Employed</option>
+                <option value="Business">Business</option>
+                <option value="Professional">Professional</option>
+                <option value="Retired">Retired</option>
+                <option value="Student">Student</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="step-content">
+            <h3 className="step-title">Address Details</h3>
+            <div className="form-group">
+              <label>Address Line <span className="required">*</span></label>
+              <div className="input-with-icon">
+                <i className="fas fa-map-marker-alt"></i>
+                <input
+                  type="text"
+                  name="addressLine"
+                  value={formData.addressLine}
+                  onChange={handleInputChange}
+                  placeholder="Enter your address"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Area <span className="required">*</span></label>
+                <input
+                  type="text"
+                  name="area"
+                  value={formData.area}
+                  onChange={handleInputChange}
+                  placeholder="Area"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Landmark</label>
+                <input
+                  type="text"
+                  name="landmark"
+                  value={formData.landmark}
+                  onChange={handleInputChange}
+                  placeholder="Landmark (Optional)"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>State <span className="required">*</span></label>
+                <select
+                  name="state"
+                  value={formData.state}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select State</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="West Bengal">West Bengal</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>City <span className="required">*</span></label>
+                <select
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select City</option>
+                  <option value="Mumbai">Mumbai</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Bangalore">Bangalore</option>
+                  <option value="Chennai">Chennai</option>
+                  <option value="Kolkata">Kolkata</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Pincode <span className="required">*</span></label>
+              <input
+                type="text"
+                name="pincode"
+                value={formData.pincode}
+                onChange={handleInputChange}
+                placeholder="Pincode"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Address Proof Type <span className="required">*</span></label>
+              <select
+                name="addressProofType"
+                value={formData.addressProofType}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Address Proof</option>
+                <option value="Electricity Bill">Electricity Bill</option>
+                <option value="Water Bill">Water Bill</option>
+                <option value="Bank Statement">Bank Statement</option>
+                <option value="Rental Agreement">Rental Agreement</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Address Proof Number <span className="required">*</span></label>
+              <input
+                type="text"
+                name="addressProofNumber"
+                value={formData.addressProofNumber}
+                onChange={handleInputChange}
+                placeholder="Enter proof number"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Upload Address Proof <span className="required">*</span></label>
+              <input
+                type="file"
+                name="addressProofFile"
+                onChange={(e) => handleFileChange(e, "addressProofFile")}
+                accept=".pdf,.jpg,.jpeg,.png"
+                className="file-input"
+                required
+              />
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="step-content">
+            <h3 className="step-title">Nominee Details</h3>
+            <div className="form-group">
+              <label>Nominee Name <span className="required">*</span></label>
+              <div className="input-with-icon">
+                <i className="fas fa-user-friends"></i>
+                <input
+                  type="text"
+                  name="nomineeName"
+                  value={formData.nomineeName}
+                  onChange={handleInputChange}
+                  placeholder="Enter nominee name"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Nominee Contact <span className="required">*</span></label>
+              <div className="input-with-icon">
+                <i className="fas fa-phone"></i>
+                <input
+                  type="tel"
+                  name="nomineeContact"
+                  value={formData.nomineeContact}
+                  onChange={handleInputChange}
+                  placeholder="Enter nominee contact number"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Nominee Relation <span className="required">*</span></label>
+              <div className="input-with-icon">
+                <i className="fas fa-heart"></i>
+                <input
+                  type="text"
+                  name="nomineeRelation"
+                  value={formData.nomineeRelation}
+                  onChange={handleInputChange}
+                  placeholder="Enter relation with nominee"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="step-content">
+            <h3 className="step-title">Payment</h3>
+            <div className="payment-notice">
+              <i className="fas fa-info-circle"></i>
+              <div>
+                <strong>Registration Fee: ₹1000</strong>
+                <p>Please complete the payment to proceed with registration</p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={generateUPIQRCode}
+              className="pay-button"
+            >
+              <i className="fas fa-qrcode"></i>
+              Pay Registration Fee
+            </button>
+
+            <div className="form-group" style={{ marginTop: "20px" }}>
+              <label>Upload Payment Proof <span className="required">*</span></label>
+              <input
+                type="file"
+                name="paymentProofFile"
+                onChange={(e) => handleFileChange(e, "paymentProofFile")}
+                accept=".pdf,.jpg,.jpeg,.png"
+                className="file-input"
+                required
+              />
+              <small>Upload screenshot of successful payment</small>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
-    <div>
-      <section
-        className="breadcrumb-area"
-        style={{ padding: "50px 0", backgroundColor: "#f8f9fa" }}
-      >
-        <div className="container">
-          <div className="row">
-            <div className="col-xl-12">
-              <div className="inner-content">
-                <div className="title">
-                  <h2
-                    style={{
-                      fontSize: "36px",
-                      fontWeight: "bold",
-                      marginBottom: "20px",
-                    }}
-                  >
-                    Savings Account
-                  </h2>
-                </div>
-                <div className="breadcrumb-menu">
-                  <ul
-                    style={{
-                      listStyle: "none",
-                      padding: 0,
-                      display: "flex",
-                      gap: "10px",
-                    }}
-                  >
-                    <li>
-                      <a
-                        href="index.php"
-                        style={{ color: "#007bff", textDecoration: "none" }}
-                      >
-                        Home
-                      </a>
-                    </li>
-                    <li style={{ color: "#666" }}>
-                      / New Savings Account Registration
-                    </li>
-                  </ul>
-                </div>
+    <div className="savings-account-container">
+      {/* Left Side - Image */}
+      <div className="left-section">
+        <div className="left-section-wrapper">
+          <div className="left-content">
+            <h1>Open Your Savings Account</h1>
+            <p>Join thousands of satisfied customers who trust us with their savings</p>
+            <div className="features">
+              <div className="feature-item">
+                <i className="fas fa-check-circle"></i>
+                <span>Quick & Easy Process</span>
+              </div>
+              <div className="feature-item">
+                <i className="fas fa-check-circle"></i>
+                <span>Secure & Reliable</span>
+              </div>
+              <div className="feature-item">
+                <i className="fas fa-check-circle"></i>
+                <span>24/7 Support</span>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section
-        className="apply-form-area"
-        style={{ padding: "50px 0", backgroundColor: "#f8f9fa" }}
-      >
-        <div className="container">
-          <div className="row">
-            <div className="col-xl-12">
-              {alertMessage.message && (
-                <div
-                  style={{
-                    padding: "15px 20px",
-                    marginBottom: "20px",
-                    borderRadius: "5px",
-                    backgroundColor:
-                      alertMessage.type === "success" ? "#d4edda" : "#f8d7da",
-                    border: `1px solid ${
-                      alertMessage.type === "success" ? "#c3e6cb" : "#f5c6cb"
-                    }`,
-                    color:
-                      alertMessage.type === "success" ? "#155724" : "#721c24",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
-                    <i
-                      className={`fas ${
-                        alertMessage.type === "success"
-                          ? "fa-check-circle"
-                          : "fa-exclamation-circle"
-                      }`}
-                      style={{ fontSize: "20px" }}
-                    ></i>
-                    <span>{alertMessage.message}</span>
-                  </div>
-                  <button
-                    onClick={() => setAlertMessage({ type: "", message: "" })}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      fontSize: "20px",
-                      cursor: "pointer",
-                      color: "inherit",
-                    }}
-                  >
-                    ×
-                  </button>
+      {/* Right Side - Form */}
+      <div className="right-section">
+        <div className="form-container">
+          <div className="form-header">
+            <h2>Send Your Request & Get Call Back</h2>
+            <p>Fill all the necessary details and get call from experts.</p>
+          </div>
+
+          {alertMessage.message && (
+            <div className={`alert alert-${alertMessage.type}`}>
+              <i
+                className={`fas ${alertMessage.type === "success"
+                    ? "fa-check-circle"
+                    : "fa-exclamation-circle"
+                  }`}
+              ></i>
+              <span>{alertMessage.message}</span>
+              <button
+                onClick={() => setAlertMessage({ type: "", message: "" })}
+                className="alert-close"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          {/* Progress Steps */}
+          <div className="progress-steps">
+            {steps.map((step) => (
+              <div
+                key={step.id}
+                className={`step ${currentStep === step.id ? "active" : ""} ${currentStep > step.id ? "completed" : ""
+                  }`}
+                onClick={() => setCurrentStep(step.id)}
+              >
+                <div className="step-icon">
+                  <i className={step.icon}></i>
                 </div>
+                <span className="step-name">{step.name}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit}>
+            {renderStepContent()}
+
+            {/* Navigation Buttons */}
+            <div className="form-navigation">
+              {currentStep > 1 && (
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="btn btn-secondary"
+                >
+                  <i className="fas fa-arrow-left"></i> Previous
+                </button>
               )}
 
-              <div
-                className="apply-form-box clearfix"
-                style={{
-                  backgroundColor: "#fff",
-                  borderRadius: "10px",
-                  padding: "40px",
-                  boxShadow: "0 0 20px rgba(0,0,0,0.1)",
-                }}
-              >
-                <div className="apply-form-box__content">
-                  <div className="sec-title" style={{ marginBottom: "30px" }}>
-                    <h2
-                      style={{
-                        fontSize: "28px",
-                        fontWeight: "bold",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      Savings Account Registration Form
-                    </h2>
-                    <div className="sub-title">
-                      <p style={{ color: "#666", fontSize: "14px" }}>
-                        Fill all the necessary details and get call from
-                        experts.
-                      </p>
-                    </div>
-                  </div>
-
-                  <form id="apply-form" className="default-form2">
-                    <SavingsForm
-                      formData={formData}
-                      handleInputChange={handleInputChange}
-                      inputStyle={inputStyle}
-                      iconStyle={iconStyle}
-                      selectStyle={selectStyle}
-                      handleFileChange={handleFileChange}
-                      fileInputStyle={fileInputStyle}
-                    />
-
-                    <div className="row">
-                      <div className="col-xl-12">
-                        <div
-                          style={{
-                            backgroundColor: "#fff3cd",
-                            border: "2px solid #ffc107",
-                            borderRadius: "5px",
-                            padding: "15px",
-                            marginBottom: "20px",
-                            textAlign: "center",
-                          }}
-                        >
-                          <strong
-                            style={{ color: "#856404", fontSize: "18px" }}
-                          >
-                            Notice: Registration FEE: Rs.1000
-                          </strong>
-                          <div style={{ marginTop: "10px" }}>
-                            <button
-                              type="button"
-                              onClick={generateUPIQRCode}
-                              style={{
-                                padding: "10px 30px",
-                                backgroundColor: "#28a745",
-                                color: "#fff",
-                                border: "none",
-                                borderRadius: "5px",
-                                fontSize: "14px",
-                                fontWeight: "bold",
-                                cursor: "pointer",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "8px",
-                              }}
-                            >
-                              <i className="fas fa-qrcode"></i>
-                              Pay Registration Fee
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="row">
-                      <div className="col-xl-12">
-                        <div
-                          className="input-box"
-                          style={{ marginBottom: "20px" }}
-                        >
-                          <label
-                            style={{
-                              display: "block",
-                              marginBottom: "10px",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            Payment Proof Upload (Screenshot after payment)
-                          </label>
-                          <input
-                            type="file"
-                            name="paymentProofFile"
-                            onChange={(e) =>
-                              handleFileChange(e, "paymentProofFile")
-                            }
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            required
-                            style={fileInputStyle}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="row">
-                      <div className="col-xl-12">
-                        <div className="button-box">
-                          <button
-                            onClick={handleSubmit}
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="btn-one"
-                            style={{
-                              padding: "15px 40px",
-                              backgroundColor: isSubmitting
-                                ? "#6c757d"
-                                : "#007bff",
-                              color: "#fff",
-                              border: "none",
-                              borderRadius: "5px",
-                              fontSize: "16px",
-                              fontWeight: "bold",
-                              cursor: isSubmitting ? "not-allowed" : "pointer",
-                              width: "100%",
-                              opacity: isSubmitting ? 0.7 : 1,
-                            }}
-                          >
-                            <span className="txt">
-                              {isSubmitting ? "Submitting..." : "Send Request"}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
+              {currentStep < 5 ? (
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="btn btn-primary"
+                >
+                  Next <i className="fas fa-arrow-right"></i>
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="btn btn-success"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i> Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-check"></i> Submit Request
+                    </>
+                  )}
+                </button>
+              )}
             </div>
-          </div>
+          </form>
         </div>
-      </section>
+      </div>
 
       {/* Payment Modal */}
       {showPaymentModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.8)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 9999,
-            padding: "20px",
-            overflowY: "auto",
-          }}
-          onClick={() => {
-            setShowPaymentModal(false);
-            setTimerActive(false);
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "15px",
-              padding: "30px",
-              maxWidth: "550px",
-              width: "100%",
-              textAlign: "center",
-              position: "relative",
-              maxHeight: "90vh",
-              overflowY: "auto",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button
+              className="modal-close"
               onClick={() => {
                 setShowPaymentModal(false);
                 setTimerActive(false);
-              }}
-              style={{
-                position: "absolute",
-                top: "15px",
-                right: "15px",
-                background: "none",
-                border: "none",
-                fontSize: "28px",
-                cursor: "pointer",
-                color: "#666",
-                fontWeight: "bold",
               }}
             >
               ×
             </button>
 
-            {/* Timer Display */}
-            <div
-              style={{
-                backgroundColor: timeRemaining < 60 ? "#fff3cd" : "#e7f3ff",
-                border: `2px solid ${
-                  timeRemaining < 60 ? "#ffc107" : "#007bff"
-                }`,
-                borderRadius: "8px",
-                padding: "12px",
-                marginBottom: "20px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-              }}
-            >
-              <i
-                className="fas fa-clock"
-                style={{
-                  fontSize: "20px",
-                  color: timeRemaining < 60 ? "#856404" : "#0056b3",
-                }}
-              ></i>
-              <span
-                style={{
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  color: timeRemaining < 60 ? "#856404" : "#0056b3",
-                }}
-              >
-                Time Remaining: {formatTime(timeRemaining)}
-              </span>
+            {/* Timer */}
+            <div className={`timer-display ${timeRemaining < 60 ? "warning" : ""}`}>
+              <i className="fas fa-clock"></i>
+              <span>Time Remaining: {formatTime(timeRemaining)}</span>
             </div>
 
-            <h3
-              style={{ marginBottom: "20px", color: "#333", fontSize: "24px" }}
-            >
-              Pay Registration Fee - ₹1000
-            </h3>
+            <h3>Pay Registration Fee - ₹1000</h3>
 
-            {/* Payment Status Notification */}
+            {/* Payment Status */}
             {paymentStatus && (
-              <div
-                style={{
-                  padding: "15px",
-                  marginBottom: "20px",
-                  borderRadius: "8px",
-                  backgroundColor:
-                    paymentStatus === "pending"
-                      ? "#fff3cd"
-                      : paymentStatus === "success"
-                      ? "#d4edda"
-                      : "#f8d7da",
-                  border: `2px solid ${
-                    paymentStatus === "pending"
-                      ? "#ffc107"
-                      : paymentStatus === "success"
-                      ? "#28a745"
-                      : "#dc3545"
-                  }`,
-                  animation: "slideIn 0.3s ease-out",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "10px",
-                  }}
-                >
-                  {paymentStatus === "pending" && (
-                    <>
-                      <i
-                        className="fas fa-spinner fa-spin"
-                        style={{ fontSize: "20px", color: "#856404" }}
-                      ></i>
-                      <span style={{ fontWeight: "bold", color: "#856404" }}>
-                        Waiting for payment approval...
-                      </span>
-                    </>
-                  )}
-                  {paymentStatus === "success" && (
-                    <>
-                      <i
-                        className="fas fa-check-circle"
-                        style={{ fontSize: "20px", color: "#155724" }}
-                      ></i>
-                      <div style={{ textAlign: "left" }}>
-                        <div style={{ fontWeight: "bold", color: "#155724" }}>
-                          Payment Successful!
-                        </div>
-                        <div style={{ fontSize: "12px", color: "#155724" }}>
-                          TXN ID: {transactionId}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  {paymentStatus === "failed" && (
-                    <>
-                      <i
-                        className="fas fa-times-circle"
-                        style={{ fontSize: "20px", color: "#721c24" }}
-                      ></i>
-                      <span style={{ fontWeight: "bold", color: "#721c24" }}>
-                        Payment Failed
-                      </span>
-                    </>
-                  )}
-                </div>
+              <div className={`payment-status ${paymentStatus}`}>
+                {paymentStatus === "pending" && (
+                  <>
+                    <i className="fas fa-spinner fa-spin"></i>
+                    <span>Waiting for payment approval...</span>
+                  </>
+                )}
+                {paymentStatus === "success" && (
+                  <>
+                    <i className="fas fa-check-circle"></i>
+                    <span>Payment Successful!</span>
+                  </>
+                )}
+                {paymentStatus === "failed" && (
+                  <>
+                    <i className="fas fa-times-circle"></i>
+                    <span>Payment Failed</span>
+                  </>
+                )}
               </div>
             )}
 
             {/* Payment Options Toggle */}
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                marginBottom: "25px",
-                justifyContent: "center",
-              }}
-            >
+            <div className="payment-toggle">
               <button
                 onClick={() => setShowManualUpi(false)}
-                style={{
-                  padding: "12px 20px",
-                  backgroundColor: !showManualUpi ? "#007bff" : "#f8f9fa",
-                  color: !showManualUpi ? "#fff" : "#333",
-                  border: "2px solid #007bff",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  flex: 1,
-                  transition: "all 0.3s",
-                }}
+                className={!showManualUpi ? "active" : ""}
               >
-                <i className="fas fa-qrcode"></i> Show QR Code
+                <i className="fas fa-qrcode"></i> QR Code
               </button>
               <button
                 onClick={() => setShowManualUpi(true)}
-                style={{
-                  padding: "12px 20px",
-                  backgroundColor: showManualUpi ? "#007bff" : "#f8f9fa",
-                  color: showManualUpi ? "#fff" : "#333",
-                  border: "2px solid #007bff",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  flex: 1,
-                  transition: "all 0.3s",
-                }}
+                className={showManualUpi ? "active" : ""}
               >
-                <i className="fas fa-mobile-alt"></i> Enter UPI ID
+                <i className="fas fa-mobile-alt"></i> UPI ID
               </button>
             </div>
 
             {/* QR Code Display */}
             {!showManualUpi && (
-              <>
-                <div style={{ marginBottom: "20px" }}>
-                  <img
-                    src={qrCodeUrl}
-                    alt="UPI QR Code"
-                    style={{
-                      maxWidth: "300px",
-                      width: "100%",
-                      height: "auto",
-                      border: "3px solid #007bff",
-                      borderRadius: "15px",
-                      padding: "15px",
-                      backgroundColor: "#fff",
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: "20px", color: "#666" }}>
-                  <p
-                    style={{
-                      marginBottom: "10px",
-                      fontWeight: "bold",
-                      fontSize: "16px",
-                    }}
-                  >
-                    <i
-                      className="fas fa-mobile-alt"
-                      style={{ marginRight: "8px", color: "#007bff" }}
-                    ></i>
-                    Scan QR code with any UPI app
-                  </p>
-                  <p style={{ fontSize: "14px" }}>
-                    Google Pay, PhonePe, Paytm, BHIM, etc.
-                  </p>
-                </div>
-              </>
+              <div className="qr-section">
+                <img src={qrCodeUrl} alt="UPI QR Code" className="qr-code" />
+                <p className="qr-instruction">
+                  <i className="fas fa-mobile-alt"></i>
+                  Scan with any UPI app (Google Pay, PhonePe, Paytm, etc.)
+                </p>
+              </div>
             )}
 
-            {/* Manual UPI Input with Verification */}
+            {/* Manual UPI Input */}
             {showManualUpi && (
-              <>
-                <div
-                  style={{
-                    backgroundColor: "#f8f9fa",
-                    padding: "20px",
-                    borderRadius: "8px",
-                    marginBottom: "20px",
-                    textAlign: "left",
-                  }}
-                >
-                  <p
-                    style={{
-                      marginBottom: "10px",
-                      fontWeight: "bold",
-                      fontSize: "14px",
-                      color: "#333",
-                    }}
-                  >
-                    <i
-                      className="fas fa-info-circle"
-                      style={{ marginRight: "5px", color: "#007bff" }}
-                    ></i>
-                    Merchant Details:
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      marginBottom: "5px",
-                      color: "#666",
-                    }}
-                  >
-                    <strong>UPI ID:</strong> 9743474558@yescred
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      marginBottom: "5px",
-                      color: "#666",
-                    }}
-                  >
-                    <strong>Name:</strong> Finance
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      marginBottom: "0",
-                      color: "#666",
-                    }}
-                  >
-                    <strong>Amount:</strong> ₹1000
-                  </p>
+              <div className="upi-section">
+                <div className="merchant-info">
+                  <p><strong>UPI ID:</strong> 9743474558@yescred</p>
+                  <p><strong>Name:</strong> Finance</p>
+                  <p><strong>Amount:</strong> ₹1000</p>
                 </div>
 
-                <div style={{ marginBottom: "20px", textAlign: "left" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "8px",
-                      fontWeight: "bold",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Enter Your UPI ID:{" "}
-                    <span style={{ color: "#dc3545" }}>*</span>
-                  </label>
-                  <div style={{ display: "flex", gap: "10px" }}>
+                <div className="form-group">
+                  <label>Enter Your UPI ID <span className="required">*</span></label>
+                  <div className="upi-input-group">
                     <input
                       type="text"
                       value={userUpiId}
                       onChange={handleUpiIdChange}
                       placeholder="yourname@bankname"
-                      style={{
-                        flex: 1,
-                        padding: "12px",
-                        border: `2px solid ${
-                          upiErrors
-                            ? "#dc3545"
-                            : isUpiVerified
-                            ? "#28a745"
-                            : "#ddd"
-                        }`,
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "border-color 0.3s",
-                      }}
-                      onFocus={(e) => {
-                        if (!upiErrors && !isUpiVerified)
-                          e.target.style.borderColor = "#007bff";
-                      }}
-                      onBlur={(e) => {
-                        if (!upiErrors && !isUpiVerified)
-                          e.target.style.borderColor = "#ddd";
-                      }}
+                      className={upiErrors ? "error" : isUpiVerified ? "success" : ""}
                     />
                     <button
                       onClick={handleVerifyUpi}
                       disabled={isVerifyingUpi || !userUpiId || !!upiErrors}
-                      style={{
-                        padding: "12px 20px",
-                        backgroundColor: isVerifyingUpi ? "#6c757d" : "#007bff",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        fontWeight: "bold",
-                        cursor:
-                          isVerifyingUpi || !userUpiId || !!upiErrors
-                            ? "not-allowed"
-                            : "pointer",
-                        opacity:
-                          isVerifyingUpi || !userUpiId || !!upiErrors ? 0.6 : 1,
-                        whiteSpace: "nowrap",
-                      }}
+                      className="verify-btn"
                     >
                       {isVerifyingUpi ? (
-                        <>
-                          <i className="fas fa-spinner fa-spin"></i>{" "}
-                          Verifying...
-                        </>
+                        <><i className="fas fa-spinner fa-spin"></i> Verifying...</>
                       ) : (
-                        <>
-                          <i className="fas fa-check-circle"></i> Verify
-                        </>
+                        <><i className="fas fa-check-circle"></i> Verify</>
                       )}
                     </button>
                   </div>
-
                   {upiErrors && (
-                    <p
-                      style={{
-                        fontSize: "12px",
-                        color: "#dc3545",
-                        marginTop: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                      }}
-                    >
+                    <p className="error-message">
                       <i className="fas fa-exclamation-circle"></i>
                       {upiErrors}
                     </p>
                   )}
-
                   {isUpiVerified && upiAccountName && (
-                    <div
-                      style={{
-                        marginTop: "12px",
-                        padding: "15px",
-                        backgroundColor: "#d4edda",
-                        border: "2px solid #c3e6cb",
-                        borderRadius: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                      }}
-                    >
-                      <i
-                        className="fas fa-user-check"
-                        style={{ fontSize: "24px", color: "#155724" }}
-                      ></i>
-                      <div style={{ textAlign: "left" }}>
-                        <p
-                          style={{
-                            fontSize: "12px",
-                            color: "#155724",
-                            margin: 0,
-                            fontWeight: "600",
-                          }}
-                        >
-                          Account Verified ✓
-                        </p>
-                        <p
-                          style={{
-                            fontSize: "16px",
-                            color: "#155724",
-                            margin: "4px 0 0 0",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {upiAccountName}
-                        </p>
+                    <div className="verified-message">
+                      <i className="fas fa-user-check"></i>
+                      <div>
+                        <p>Account Verified ✓</p>
+                        <strong>{upiAccountName}</strong>
                       </div>
                     </div>
                   )}
-
-                  {!upiErrors &&
-                    userUpiId &&
-                    !isUpiVerified &&
-                    !isVerifyingUpi && (
-                      <p
-                        style={{
-                          fontSize: "12px",
-                          color: "#666",
-                          marginTop: "8px",
-                        }}
-                      >
-                        Click "Verify" to check UPI ID and see account holder
-                        name
-                      </p>
-                    )}
-
-                  <p
-                    style={{
-                      fontSize: "12px",
-                      color: "#666",
-                      marginTop: "8px",
-                    }}
-                  >
-                    Example: 9876543210@paytm, username@oksbi, name@ybl
-                  </p>
                 </div>
 
                 <button
                   onClick={sendPaymentRequest}
                   disabled={!isUpiVerified || paymentStatus === "pending"}
-                  style={{
-                    padding: "14px 30px",
-                    backgroundColor:
-                      !isUpiVerified || paymentStatus === "pending"
-                        ? "#6c757d"
-                        : "#28a745",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    cursor:
-                      !isUpiVerified || paymentStatus === "pending"
-                        ? "not-allowed"
-                        : "pointer",
-                    width: "100%",
-                    marginBottom: "15px",
-                    opacity:
-                      !isUpiVerified || paymentStatus === "pending" ? 0.6 : 1,
-                    transition: "all 0.3s",
-                  }}
+                  className="send-payment-btn"
                 >
                   {paymentStatus === "pending" ? (
-                    <>
-                      <i className="fas fa-spinner fa-spin"></i> Processing...
-                    </>
+                    <><i className="fas fa-spinner fa-spin"></i> Processing...</>
                   ) : (
-                    <>
-                      <i className="fas fa-paper-plane"></i> Send Payment
-                      Request (₹1000)
-                    </>
+                    <><i className="fas fa-paper-plane"></i> Send Payment Request (₹1000)</>
                   )}
                 </button>
-              </>
+              </div>
             )}
 
             {/* Instructions */}
-            <div
-              style={{
-                backgroundColor: "#f8f9fa",
-                padding: "15px",
-                borderRadius: "8px",
-                marginBottom: "20px",
-                fontSize: "14px",
-                textAlign: "left",
-              }}
-            >
-              <p style={{ marginBottom: "10px", fontWeight: "bold" }}>
-                <i
-                  className="fas fa-info-circle"
-                  style={{ marginRight: "5px", color: "#007bff" }}
-                ></i>
-                How to pay:
-              </p>
-              <ol style={{ paddingLeft: "20px", margin: 0, lineHeight: "1.8" }}>
+            <div className="payment-instructions">
+              <h4><i className="fas fa-info-circle"></i> How to pay:</h4>
+              <ol>
                 {!showManualUpi ? (
                   <>
                     <li>Open any UPI app on your phone</li>
                     <li>Scan the QR code shown above</li>
                     <li>Verify amount is ₹1000</li>
                     <li>Enter your UPI PIN and complete payment</li>
-                    <li>Take screenshot of payment confirmation</li>
-                    <li>Upload screenshot in the form above</li>
+                    <li>Take screenshot and upload in the form</li>
                   </>
                 ) : (
                   <>
-                    <li>Enter your UPI ID in the field above</li>
-                    <li>Click "Verify" to confirm your account</li>
-                    <li>Your name will be displayed after verification</li>
-                    <li>Click "Send Payment Request" button</li>
-                    <li>
-                      You will receive a payment request notification in your
-                      UPI app
-                    </li>
-                    <li>Open your UPI app and approve the ₹1000 payment</li>
-                    <li>Take screenshot of payment confirmation</li>
-                    <li>Upload screenshot in the form above</li>
+                    <li>Enter your UPI ID and click Verify</li>
+                    <li>Click "Send Payment Request"</li>
+                    <li>Approve payment in your UPI app</li>
+                    <li>Take screenshot and upload in the form</li>
                   </>
                 )}
               </ol>
             </div>
-
-            {/* UPI Apps */}
-            <div style={{ marginBottom: "20px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#666",
-                  marginBottom: "10px",
-                  fontWeight: "500",
-                }}
-              >
-                Works with all UPI apps:
-              </p>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  justifyContent: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                {[
-                  "PhonePe",
-                  "Google Pay",
-                  "Paytm",
-                  "BHIM",
-                  "Amazon Pay",
-                  "Cred",
-                ].map((app) => (
-                  <span
-                    key={app}
-                    style={{
-                      backgroundColor: "#e9ecef",
-                      padding: "6px 12px",
-                      borderRadius: "5px",
-                      fontSize: "11px",
-                      fontWeight: "600",
-                      color: "#495057",
-                    }}
-                  >
-                    {app}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                setShowPaymentModal(false);
-                setTimerActive(false);
-              }}
-              style={{
-                padding: "12px 30px",
-                backgroundColor: "#6c757d",
-                color: "#fff",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: "bold",
-                cursor: "pointer",
-                transition: "background-color 0.3s",
-              }}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = "#5a6268")}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = "#6c757d")}
-            >
-              <i className="fas fa-times" style={{ marginRight: "5px" }}></i>
-              Close
-            </button>
           </div>
         </div>
       )}
-
-      <section
-        className="partner-area"
-        style={{ padding: "50px 0", backgroundColor: "#fff" }}
-      >
-        <div className="container">
-          <div
-            className="partner-area__sec-title"
-            style={{ textAlign: "center", marginBottom: "40px" }}
-          >
-            <h3 style={{ fontSize: "28px", fontWeight: "bold" }}>
-              Corporate Partnership With
-            </h3>
-          </div>
-          <div className="brand-content">
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                gap: "30px",
-              }}
-            >
-              <div className="single-partner-logo-box">
-                <a href="#">
-                  <img
-                    src="assets/images/brand/brand-1-1.png"
-                    alt="Partner 1"
-                    style={{ maxWidth: "150px", height: "auto" }}
-                  />
-                </a>
-              </div>
-              <div className="single-partner-logo-box">
-                <a href="#">
-                  <img
-                    src="assets/images/brand/brand-1-2.png"
-                    alt="Partner 2"
-                    style={{ maxWidth: "150px", height: "auto" }}
-                  />
-                </a>
-              </div>
-              <div className="single-partner-logo-box">
-                <a href="#">
-                  <img
-                    src="assets/images/brand/brand-1-3.png"
-                    alt="Partner 3"
-                    style={{ maxWidth: "150px", height: "auto" }}
-                  />
-                </a>
-              </div>
-              <div className="single-partner-logo-box">
-                <a href="#">
-                  <img
-                    src="assets/images/brand/brand-1-4.png"
-                    alt="Partner 4"
-                    style={{ maxWidth: "150px", height: "auto" }}
-                  />
-                </a>
-              </div>
-              <div className="single-partner-logo-box">
-                <a href="#">
-                  <img
-                    src="assets/images/brand/brand-1-5.png"
-                    alt="Partner 5"
-                    style={{ maxWidth: "150px", height: "auto" }}
-                  />
-                </a>
-              </div>
-              <div className="single-partner-logo-box">
-                <a href="#">
-                  <img
-                    src="assets/images/brand/brand-1-6.png"
-                    alt="Partner 6"
-                    style={{ maxWidth: "150px", height: "auto" }}
-                  />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <style>
-        {`
-          @keyframes slideIn {
-            from {
-              transform: translateY(-20px);
-              opacity: 0;
-            }
-            to {
-              transform: translateY(0);
-              opacity: 1;
-            }
-          }
-        `}
-      </style>
     </div>
   );
 };

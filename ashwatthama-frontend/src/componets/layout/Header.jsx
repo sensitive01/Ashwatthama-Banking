@@ -1,55 +1,40 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const Header = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+
+    const handleClickOutside = (event) => {
+      const menu = document.querySelector('.main-menu__list');
+      const toggler = document.querySelector('.mobile-nav__toggler');
+
+      if (menu && toggler &&
+        !menu.contains(event.target) &&
+        !toggler.contains(event.target)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
   return (
     <>
-      {/* Start preloader */}
-      {/* <div className="loader-wrap">
-        <div className="preloader">
-          <div className="preloader-close">x</div>
-          <div id="handle-preloader" className="handle-preloader">
-            <div className="animation-preloader">
-              <div className="spinner" />
-              <div className="txt-loading">
-                <span data-text-preloader="A" className="letters-loading">
-                  A
-                </span>
-                <span data-text-preloader="S" className="letters-loading">
-                  S
-                </span>
-                <span data-text-preloader="H" className="letters-loading">
-                  H
-                </span>
-                <span data-text-preloader="W" className="letters-loading">
-                  W
-                </span>
-                <span data-text-preloader="A" className="letters-loading">
-                  A
-                </span>
-                <span data-text-preloader="T" className="letters-loading">
-                  T
-                </span>
-                <span data-text-preloader="T" className="letters-loading">
-                  T
-                </span>
-                <span data-text-preloader="H" className="letters-loading">
-                  H
-                </span>
-                <span data-text-preloader="A" className="letters-loading">
-                  A
-                </span>
-                <span data-text-preloader="M" className="letters-loading">
-                  M
-                </span>
-                <span data-text-preloader="A" className="letters-loading">
-                  A
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
-      {/* End preloader */}
       <div className="page-wrapper">
         <header className="main-header main-header-style1">
           {/*Start Main Header Style1 Top*/}
@@ -63,12 +48,36 @@ const Header = () => {
                       <span className="icon-binoculars" />
                       <p>Looking</p>
                     </div>
-                    <div className="select-box clearfix">
-                      <select className="wide">
+                    <div className="select-box clearfix" style={{ position: 'relative', width: '200px' }}>
+                      <select
+                        className="wide"
+                        style={{
+                          padding: '8px 20px',
+                          width: '100%',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          backgroundColor: 'white',
+                          cursor: 'pointer',
+                          appearance: 'none',
+                          WebkitAppearance: 'none',
+                          backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E")',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'right 10px center',
+                          paddingRight: '30px',
+                          fontSize: '14px',
+                          color: '#333',
+                          height: '40px',
+                          boxSizing: 'border-box',
+                          outline: 'none',
+                          boxShadow: 'none'
+                        }}
+                      >
                         <option data-display="Personal Banking">
                           Savings Account
                         </option>
-                        <option value={1}>Fixed Deposit Account</option>
+                        <option value={1}>
+                          Fixed Deposit Account
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -83,10 +92,10 @@ const Header = () => {
                   <div className="header-menu-style1">
                     <ul>
                       <li>
-                        <a href="#">Careers</a>
+                        <a href="/career-page">Careers</a>
                       </li>
                       <li>
-                        <a href="#">Faq’s</a>
+                        <a href="/faq-page">Faq's</a>
                       </li>
                       <li>
                         <a href="#">Offers</a>
@@ -106,7 +115,7 @@ const Header = () => {
                     <div id="polyglotLanguageSwitcher">
                       <form action="#">
                         <select id="polyglot-language-options">
-                          <option id="en" value="en" selected="">
+                          <option id="en" value="en">
                             English
                           </option>
                           <option id="fr" value="fr">
@@ -144,10 +153,17 @@ const Header = () => {
                       </a>
                     </div>
                     <div className="main-menu-box">
-                      <a href="#" className="mobile-nav__toggler">
-                        <i className="icon-menu" />
+                      <a
+                        href="#"
+                        className="mobile-nav__toggler"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleMobileMenu();
+                        }}
+                      >
+                        <i className={`icon-menu ${mobileMenuOpen ? 'active' : ''}`} />
                       </a>
-                      <ul className="main-menu__list one-page-scroll-menu">
+                      <ul className={`main-menu__list one-page-scroll-menu ${mobileMenuOpen ? 'mobile-menu-visible' : ''}`}>
                         <li className="scrollToLink">
                           <a href="/">Home</a>
                         </li>
@@ -181,7 +197,7 @@ const Header = () => {
                     <div className="header-btn-one">
                       <a
                         className="style2"
-                        href="new-savings-account-registration.php"
+                        href="/new-savings-account-reg-form"
                       >
                         <span className="icon-payment" />
                         Open a Savings Account
@@ -224,6 +240,96 @@ const Header = () => {
           {/*End Main Header Style1 Bottom*/}
         </header>
       </div>
+      <style jsx global>{`
+        .main-menu-box {
+          position: relative;
+        }
+
+        .mobile-nav__toggler {
+          display: none;
+          font-size: 24px;
+          color: #333;
+          padding: 10px;
+          cursor: pointer;
+          z-index: 1001;
+          position: relative;
+        }
+
+        .icon-menu {
+          transition: all 0.3s ease;
+        }
+
+        .icon-menu.active {
+          transform: rotate(90deg);
+        }
+
+        @media (max-width: 991px) {
+          .mobile-nav__toggler {
+            display: block;
+          }
+
+          .main-menu__list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            z-index: 1000;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 8px 8px;
+            margin: 0;
+            list-style: none;
+          }
+
+          .main-menu__list.mobile-menu-visible {
+            display: block !important;
+          }
+
+          .main-menu__list > li {
+            display: block;
+            margin: 0;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+          }
+
+          .main-menu__list > li:last-child {
+            border-bottom: none;
+          }
+
+          .main-menu__list > li > a {
+            display: block;
+            color: #333;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 5px 0;
+          }
+
+          .dropdown > ul {
+            position: static !important;
+            display: none;
+            opacity: 1;
+            visibility: visible;
+            box-shadow: none;
+            padding-left: 20px;
+            margin-top: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+          }
+
+          .dropdown:hover > ul,
+          .dropdown.active > ul {
+            display: block;
+          }
+        }
+
+        @media (min-width: 992px) {
+          .main-menu__list {
+            display: flex !important;
+          }
+        }
+      `}</style>
     </>
   );
 };
