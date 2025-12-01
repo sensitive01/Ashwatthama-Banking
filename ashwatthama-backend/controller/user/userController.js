@@ -5,6 +5,7 @@ require("dotenv").config();
 const crypto = require("crypto");
 const { otpEmailTemplate } = require("../../utils/emailTemplates");
 const sendEmail = require("../../utils/sendEmail");
+const contactModel = require("../../model/user/contactModel");
 
 const otpStore = {};
 
@@ -36,10 +37,27 @@ const createSavingsAccount = async (req, res) => {
       nomineeRelation,
     } = req.body;
 
+    // ✅ Basic required field validation
     if (!firstName || !lastName || !email || !contactNumber) {
       return res.status(400).json({
         message: "Missing required fields",
         required: ["firstName", "lastName", "email", "contactNumber"],
+      });
+    }
+
+    // ✅ Check if email or mobile number is already registered
+    const existingUser = await SavingsAccount.findOne({
+      $or: [{ email }, { contactNumber }],
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User already registered",
+        details: {
+          emailExists: existingUser.email === email,
+          contactExists: existingUser.contactNumber === contactNumber,
+        },
       });
     }
 
@@ -149,19 +167,134 @@ const createSavingsAccount = async (req, res) => {
     });
 
     const mailOptions = {
-      from: `"MyBank" <${process.env.EMAIL_USER}>`,
+      from: `"Ashwatthama Core Banking" <${process.env.EMAIL_USER_BANKING}>`,
       to: email,
-      subject: "Your New Savings Account Details",
+      subject: "🎉 Welcome to Ashwatthama Core Banking - Your Account is Ready!",
       html: `
-        <h2>Welcome ${firstName} ${lastName}!</h2>
-        <p>Your savings account has been successfully created.</p>
-        <p><strong>Customer ID:</strong> ${customerId}</p>
-        <p><strong>Account Number:</strong> ${accountNumber}</p>
-        <p><strong>Temporary Password:</strong> ${plainPassword}</p>
-        <p>Please log in and change your password immediately for security.</p>
-        <br/>
-        <p>Thank you,<br/>MyBank Team</p>
-      `,
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
+        <tr>
+          <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              
+              <!-- Header -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #b71c1c 0%, #d32f2f 100%); padding: 40px 30px; text-align: center;">
+                  <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: bold;">🏦 Ashwatthama Core Banking</h1>
+                  <p style="margin: 8px 0 0 0; color: #ffffff; font-size: 14px; opacity: 0.9;">Your Trusted Banking Partner</p>
+                </td>
+              </tr>
+
+              <!-- Success Banner -->
+              <tr>
+                <td style="background-color: #e8f5e9; padding: 20px 30px; border-bottom: 3px solid #4caf50;">
+                  <table width="100%">
+                    <tr>
+                      <td width="50">
+                        <div style="width: 40px; height: 40px; background-color: #4caf50; border-radius: 50%; text-align: center; line-height: 40px; color: #ffffff; font-size: 24px;">✓</div>
+                      </td>
+                      <td style="padding-left: 15px;">
+                        <h2 style="margin: 0; color: #2e7d32; font-size: 18px;">Account Created Successfully!</h2>
+                        <p style="margin: 5px 0 0 0; color: #558b2f; font-size: 13px;">Welcome to Ashwatthama Core Banking</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <!-- Main Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  
+                  <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 20px;">Dear ${firstName} ${lastName},</h3>
+                  <p style="margin: 0 0 25px 0; color: #555; font-size: 15px; line-height: 1.6;">Congratulations! Your savings account has been successfully created. We're thrilled to have you with us.</p>
+
+                  <!-- Account Details Box -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fff5f5; border: 2px solid #d32f2f; border-radius: 8px; margin-bottom: 25px;">
+                    <tr>
+                      <td style="padding: 20px;">
+                        <h4 style="margin: 0 0 15px 0; color: #d32f2f; font-size: 16px; text-align: center; border-bottom: 2px solid #d32f2f; padding-bottom: 10px;">📋 Your Account Details</h4>
+                        
+                        <div style="padding: 10px; background-color: #f9f9f9; border-radius: 5px; margin-bottom: 12px;">
+                          <div style="color: #666; font-size: 12px; font-weight: 600; margin-bottom: 5px;">CUSTOMER ID</div>
+                          <div style="color: #2c3e50; font-size: 16px; font-weight: bold; font-family: 'Courier New', monospace;">${customerId}</div>
+                        </div>
+
+                        <div style="padding: 10px; background-color: #f9f9f9; border-radius: 5px; margin-bottom: 12px;">
+                          <div style="color: #666; font-size: 12px; font-weight: 600; margin-bottom: 5px;">ACCOUNT NUMBER</div>
+                          <div style="color: #2c3e50; font-size: 16px; font-weight: bold; font-family: 'Courier New', monospace;">${accountNumber}</div>
+                        </div>
+
+                        <div style="padding: 10px; background-color: #fff3cd; border: 2px solid #ffc107; border-radius: 5px;">
+                          <div style="color: #856404; font-size: 12px; font-weight: 600; margin-bottom: 5px;">🔒 TEMPORARY PASSWORD</div>
+                          <div style="color: #2c3e50; font-size: 16px; font-weight: bold; font-family: 'Courier New', monospace; background-color: #ffffff; padding: 8px; border-radius: 4px; display: inline-block;">${plainPassword}</div>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Security Warning -->
+                  <div style="background-color: #fff3cd; border-left: 4px solid #ff9800; border-radius: 6px; padding: 15px; margin-bottom: 25px;">
+                    <table width="100%">
+                      <tr>
+                        <td width="30" style="font-size: 24px; vertical-align: top;">⚠️</td>
+                        <td style="padding-left: 10px;">
+                          <h4 style="margin: 0 0 8px 0; color: #f57c00; font-size: 14px; font-weight: bold;">Important Security Notice</h4>
+                          <p style="margin: 0; color: #856404; font-size: 13px; line-height: 1.5;"><strong>Please change your password immediately after your first login.</strong> This temporary password is for initial access only.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+
+                  <!-- Next Steps -->
+                  <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                    <h4 style="margin: 0 0 15px 0; color: #d32f2f; font-size: 16px;">🚀 Next Steps</h4>
+                    <ol style="margin: 0; padding-left: 20px; color: #555; font-size: 14px; line-height: 1.8;">
+                      <li>Log in using your Customer ID and temporary password</li>
+                      <li><strong>Change your password immediately</strong></li>
+                      <li>Complete your profile setup</li>
+                      <li>Start banking!</li>
+                    </ol>
+                  </div>
+
+                  <!-- Login Button -->
+                  <div style="text-align: center; margin-bottom: 25px;">
+                    <a href="https://yoursite.com/login" style="display: inline-block; background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); color: #ffffff; text-decoration: none; padding: 14px 35px; border-radius: 6px; font-size: 15px; font-weight: bold;">🔐 Login to Your Account</a>
+                  </div>
+
+                  <!-- Support -->
+                  <div style="background-color: #f8f9fa; border-radius: 6px; padding: 15px; text-align: center;">
+                    <p style="margin: 0 0 8px 0; color: #666; font-size: 13px;">Need help? We're here for you!</p>
+                    <p style="margin: 0; color: #d32f2f; font-size: 13px; font-weight: 600;">📧 support@ashwatthama.com | 📞 1-800-BANKING</p>
+                  </div>
+
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td style="background-color: #2c3e50; padding: 25px; text-align: center;">
+                  <p style="margin: 0 0 12px 0; color: #ffffff; font-size: 14px; font-weight: 600;">Thank you for choosing Ashwatthama Core Banking</p>
+                  <p style="margin: 0 0 15px 0; color: #bdc3c7; font-size: 12px;">This email contains sensitive information. Do not share your credentials with anyone.</p>
+                  <div style="border-top: 1px solid #4a5568; padding-top: 15px;">
+                    <p style="margin: 0; color: #95a5a6; font-size: 11px;">© ${new Date().getFullYear()} Ashwatthama Core Banking. All rights reserved.</p>
+                  </div>
+                </td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `,
     };
 
     await transporter.sendMail(mailOptions);
@@ -202,6 +335,7 @@ const createSavingsAccount = async (req, res) => {
     });
   }
 };
+
 
 const updateCustomerData = async (req, res) => {
   try {
@@ -370,7 +504,7 @@ const getCustomerName = async (req, res) => {
 
     const customer = await SavingsAccount.findOne(
       { _id: customerId },
-      { firstName: 1, isPasswordChanged: 1, _id: 0 } // only return firstName
+      { password: 0 } // only return firstName
     );
 
     if (!customer) {
@@ -383,6 +517,7 @@ const getCustomerName = async (req, res) => {
       success: true,
       firstName: customer.firstName,
       isPasswordChanged: customer.isPasswordChanged,
+      userData: customer
     });
   } catch (err) {
     console.error("Error fetching customer name:", err);
@@ -443,6 +578,100 @@ const customerChangePassword = async (req, res) => {
       customer.isPasswordChanged = true;
     }
     await customer.save();
+
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER_BANKING,
+        pass: process.env.EMAIL_PASS_BANKING,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    // Send email notification
+    try {
+      const mailOptions = {
+        from: process.env.EMAIL_USER_BANKING,
+        to: customer.email,
+        subject: "Password Changed Successfully",
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+              }
+              .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+              }
+              .header {
+                background-color: #C41E3A;
+                color: white;
+                padding: 20px;
+                text-align: center;
+                border-radius: 8px 8px 0 0;
+              }
+              .content {
+                padding: 30px 20px;
+                background-color: #f9f9f9;
+              }
+              .footer {
+                text-align: center;
+                padding: 20px;
+                font-size: 12px;
+                color: #666;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Password Changed Successfully</h1>
+              </div>
+              <div class="content">
+                <p>Dear <strong>${customer.firstName || 'Valued Customer'}</strong>,</p>
+                
+                <p>Your password has been changed successfully on ${new Date().toLocaleString()}.</p>
+                
+                <p><strong>If you did not make this change, please contact our support team immediately.</strong></p>
+                
+                <p>For security reasons, we recommend that you:</p>
+                <ul>
+                  <li>Never share your password with anyone</li>
+                  <li>Use a unique password for your account</li>
+                  <li>Change your password regularly</li>
+                </ul>
+                
+                <p>If you have any questions or concerns, please don't hesitate to reach out to us.</p>
+                
+                <p>Best regards,<br>Ashwatthama Core Banking Team</p>
+              </div>
+              <div class="footer">
+                <p>This is an automated message. Please do not reply to this email.</p>
+                <p>&copy; ${new Date().getFullYear()}Ashwatthama Core Banking. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log("Password change email sent successfully to:", customer.email);
+    } catch (emailError) {
+      console.error("Error sending password change email:", emailError);
+
+    }
 
     res
       .status(200)
@@ -656,6 +885,59 @@ const resetPasswordForAccountLogin = async (req, res) => {
   }
 };
 
+const userSubmitContactUsForm = async (req, res) => {
+  try {
+    console.log("am in contact submit");
+
+    const { formData } = req.body;
+
+    // Save form data to DB
+    const newContactData = await contactModel.create({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      subject: formData.subject,
+      message: formData.message,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Contact form submitted successfully",
+      data: newContactData,
+    });
+
+  } catch (err) {
+    console.log("err", err);
+    return res.status(500).json({
+      success: false,
+      message: "Error submitting contact form",
+      error: err.message,
+    });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
   resetPasswordForAccountLogin,
   verifyOtpForAccountVerification,
@@ -666,4 +948,5 @@ module.exports = {
   getCustomerName,
   verifyUserLogin,
   createSavingsAccount,
+  userSubmitContactUsForm
 };

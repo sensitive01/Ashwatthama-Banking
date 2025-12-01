@@ -8,6 +8,8 @@ adminRoute.get("/get-individual-user-data/:id",adminController.getIndividualUser
 
 adminRoute.post("/admin-verification",adminController.adminVerification)
 
+adminRoute.get("/get-all-enquiries",adminController.getAllEnquiries)
+
 
 adminRoute.delete("/delete-user-data/:id",adminController.deleteUserData)
 

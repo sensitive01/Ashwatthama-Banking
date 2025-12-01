@@ -32,5 +32,6 @@ userRoute.put("/change-customer-password/:customerId",userController.customerCha
 userRoute.post("/send-otp-for-account-verification",userController.sendOtpForAccountVerification);
 userRoute.post("/verify-otp-for-account-verification",userController.verifyOtpForAccountVerification);
 userRoute.post("/reset-password-for-account-login",userController.resetPasswordForAccountLogin);
+userRoute.post("/user-submit-contact-us-form",userController.userSubmitContactUsForm);
 
 module.exports = userRoute;

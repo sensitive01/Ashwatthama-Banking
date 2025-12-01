@@ -25,14 +25,14 @@ const savingsAccountSchema = new mongoose.Schema(
     nomineeContact: String,
     nomineeRelation: String,
     paymentProofFile: String,
-    isVisible: { type: Boolean, default: true },
-    isProfileActive: { type: Boolean, default: false },
-    accountNumber: String,
     password: String,
-    isPasswordChanged:{type:Boolean,default:false},
     customerId:{type:String},
-    avlBalance:{type:Number,default:0}
+    avlBalance:{type:Number,default:0},
+    accountNumber: String,
     
+    isVisible: { type: Boolean, default: true },
+    isPasswordChanged:{type:Boolean,default:false},
+    isProfileActive: { type: Boolean, default: false },
     
   },
   { timestamps: true }

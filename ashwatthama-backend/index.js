@@ -13,7 +13,8 @@ const port = 3001;
 // ✅ List of allowed frontend domains
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://ashwatthama-banking.vercel.app"
+  "https://ashwatthama-banking.vercel.app",
+  "http://localhost:5175"
 
 ];
 

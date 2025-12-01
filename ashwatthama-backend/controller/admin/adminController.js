@@ -1,5 +1,6 @@
 const Admin = require("../../model/admin/adminModel");
 const UserModel = require("../../model/user/userModel");
+const contactSchema = require("../../model/user/contactModel")
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -73,7 +74,7 @@ const adminVerification = async (req, res) => {
 
 const getUserFormData = async (req, res) => {
   try {
-    const userData = await UserModel.find({isVisible:true});
+    const userData = await UserModel.find({ isVisible: true });
     res.status(200).json({ success: true, data: userData });
   } catch (err) {
     console.error("Error in getting the user form data:", err);
@@ -125,7 +126,39 @@ const deleteUserData = async (req, res) => {
 };
 
 
+const getAllEnquiries = async (req, res) => {
+  try {
+    const enquiryData = await contactSchema.find();
+
+    return res.status(200).json({
+      success: true,
+      message: "Enquiries fetched successfully",
+      data: enquiryData
+    });
+
+  } catch (err) {
+    console.log("Error in getting all enquiries", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch enquiries",
+      error: err.message
+    });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
+  getAllEnquiries,
   deleteUserData,
   getIndividualUserData,
   getUserFormData,
